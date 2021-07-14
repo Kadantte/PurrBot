@@ -54,7 +54,7 @@ public class CmdInfo implements Command{
             String mention = member.getAsMention();
             String prefix = bot.isBeta() ? "snuggle" : "purr";
             member.getUser().openPrivateChannel()
-                    .flatMap(channel -> channel.sendMessage(embed))
+                    .flatMap(channel -> channel.sendMessageEmbeds(embed))
                     .queue(
                             message -> tc.sendMessage(
                                     bot.getMsg(guild.getId(), prefix + ".info.info.dm_success", mention)
@@ -66,7 +66,7 @@ public class CmdInfo implements Command{
             return;
         }
 
-        tc.sendMessage(embed).queue();
+        tc.sendMessageEmbeds(embed).queue();
     }
     
     private MessageEmbed getEmbed(Member member){
@@ -117,12 +117,18 @@ public class CmdInfo implements Command{
                 )
                 .addField(
                         bot.getMsg(guild.getId(), "purr.info.info.embed.bot_lists_title"),
-                        "[`Botlist.space`](" +          Links.BOTLIST_SPACE +          ")\n" +
-                        "[`Discord.boats`](" +          Links.DISCORD_BOATS +          ")\n" +
-                        "[`Discordbotlist.com`](" +     Links.DISCORDBOTLIST_COM +     ")\n" +
-                        "[`Discord.bots.gg`](" +        Links.DISCORD_BOTS_GG +        ")\n" +
-                        "[`Discordextremelist.xyz`](" + Links.DISCORDEXTREMELIST_XYZ + ")\n" +
-                        "[`Discordservices.net`](" +    Links.DISCORDSERVICES_NET +    ")",
+                        String.format(
+                                "[`Discord.boats`](%s)\n" +
+                                "[`Discord.bots.gg`](%s)\n" +
+                                "[`Discordextremelist.xyz`](%s)\n" +
+                                "[`Discordlist.space`](%s)\n" +
+                                "[`Discordservices.net`](%s)",
+                                Links.DISCORD_BOATS,
+                                Links.DISCORD_BOTS_GG,
+                                Links.DISCORDEXTREMELIST_XYZ,
+                                Links.DISCORDLIST_SPACE,
+                                Links.DISCORDSERVICES_NET
+                        ),
                         false
                 )
                 .addField(

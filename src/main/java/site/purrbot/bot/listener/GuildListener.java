@@ -21,14 +21,12 @@ package site.purrbot.bot.listener;
 import ch.qos.logback.classic.Logger;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.MarkdownSanitizer;
 import org.slf4j.LoggerFactory;
@@ -38,8 +36,6 @@ import site.purrbot.bot.constants.Links;
 import site.purrbot.bot.util.message.WebhookUtil;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.ZonedDateTime;
 
 public class GuildListener extends ListenerAdapter{
@@ -115,43 +111,6 @@ public class GuildListener extends ListenerAdapter{
                 owner -> sendWebhook(owner, guild, Action.LEAVE),
                 e -> sendWebhook(null, guild, Action.LEAVE)
         );
-    }
-
-    @Override
-    public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event){
-        Guild guild = event.getGuild();
-
-        if(event.getUser().isBot())
-            return;
-
-        if(bot.getWelcomeChannel(guild.getId()).equals("none"))
-            return;
-
-        TextChannel tc = guild.getTextChannelById(bot.getWelcomeChannel(guild.getId()));
-        if(tc == null)
-            return;
-
-        if(!guild.getSelfMember().hasPermission(tc, Permission.MESSAGE_WRITE))
-            return;
-
-        String msg = bot.getWelcomeMsg(guild.getId());
-        if(msg == null)
-            msg = "Hello {mention}!";
-        
-        InputStream image;
-    
-        try {
-            image = bot.getImageUtil().getWelcomeImg(
-                    event.getMember(),
-                    bot.getWelcomeIcon(guild.getId()),
-                    bot.getWelcomeBg(guild.getId()),
-                    bot.getWelcomeColor(guild.getId())
-            );
-        }catch(IOException ex){
-            image = null;
-        }
-        
-        bot.getMessageUtil().sendWelcomeMsg(tc, msg, event.getMember(), image);
     }
 
     @Override

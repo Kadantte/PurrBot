@@ -33,10 +33,12 @@ public final class LangUtils{
         switch(language.toLowerCase()){
             case "de-ch":
             case "en-owo":
+            case "es-es":
             case "fr-fr":
             case "ko-kr":
             case "pt-br":
             case "ru-ru":
+            case "tr-tr":
                 return bot.getFileManager().getString(language.toLowerCase(), path);
     
             case "it-it":
@@ -50,10 +52,12 @@ public final class LangUtils{
         switch(language.toLowerCase()){
             case "de-ch":
             case "en-owo":
+            case "es-es":
             case "fr-fr":
             case "ko-kr":
             case "pt-br":
             case "ru-ru":
+            case "tr-tr":
                 return bot.getFileManager().getStringlist(language.toLowerCase(), path);
     
             case "it-it":
@@ -67,12 +71,14 @@ public final class LangUtils{
         DE_CH ("\uDDE8", "\uDDED"),
         EN    ("\uDDEC", "\uDDE7"),
         EN_OWO("\uDDEC", "\uDDE7"),
+        ES_ES ("\uDDEA", "\uDDF8"),
         //ET_EE ("\uDDEA", "\uDDEA"),
         FR_FR ("\uDDEB", "\uDDF7"),
         //IT_IT ("\uDDEE", "\uDDF9"),
         KO_KR ("\uDDF0", "\uDDF7"),
         PT_BR ("\uDDE7", "\uDDF7"),
         RU_RU ("\uDDF7", "\uDDFA"),
+        TR_TR ("\uDDF9", "\uDDF7"),
         
         UNKNOWN("\uDDFA", "\uDDF3");
         

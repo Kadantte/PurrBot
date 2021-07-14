@@ -42,6 +42,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.botblock.javabotblockapi.core.BotBlockAPI;
 import org.botblock.javabotblockapi.core.Site;
 import org.botblock.javabotblockapi.jda.PostAction;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,7 @@ import site.purrbot.bot.constants.IDs;
 import site.purrbot.bot.constants.Links;
 import site.purrbot.bot.listener.ConnectionListener;
 import site.purrbot.bot.listener.GuildListener;
+import site.purrbot.bot.listener.MemberListener;
 import site.purrbot.bot.listener.ReadyListener;
 import site.purrbot.bot.util.*;
 import site.purrbot.bot.util.file.FileManager;
@@ -93,7 +95,7 @@ public class PurrBot {
     private final EventWaiter waiter = new EventWaiter();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     
-    private final Cache<String, GuildSettings> guildSettings = Caffeine.newBuilder()
+    private final Cache<@NotNull String, @NotNull GuildSettings> guildSettings = Caffeine.newBuilder()
             .expireAfterWrite(10, TimeUnit.MINUTES)
             .build();
     
@@ -114,11 +116,13 @@ public class PurrBot {
                 .addLang("de-CH")
                 .addLang("en")
                 .addLang("en-OWO")
+                .addLang("es-ES")
                 .addLang("fr-FR")
                 //.addLang("it-IT") // Discontinued at the moment.
                 .addLang("ko-KR")
                 .addLang("pt-BR")
-                .addLang("ru-RU");
+                .addLang("ru-RU")
+                .addLang("tr-TR");
 
         dbUtil      = new DBUtil(this);
         messageUtil = new MessageUtil(this);
@@ -138,6 +142,7 @@ public class PurrBot {
         ));
         shardManager = DefaultShardManagerBuilder
                 .createDefault(getFileManager().getString("config", "bot-token"))
+                .disableIntents(GatewayIntent.GUILD_VOICE_STATES)
                 .enableIntents(GatewayIntent.GUILD_MEMBERS)
                 .disableCache(CacheFlag.VOICE_STATE)
                 .setChunkingFilter(ChunkingFilter.include(Long.parseLong(IDs.GUILD)))
@@ -146,6 +151,7 @@ public class PurrBot {
                         new ReadyListener(this),
                         new ConnectionListener(this),
                         new GuildListener(this),
+                        new MemberListener(this),
                         new CommandListener(this, CMD_HANDLER),
                         waiter
                 )
@@ -273,15 +279,28 @@ public class PurrBot {
         return getFileManager().getStringlist("data", "welcome.icon");
     }
     
-    public String getMsg(String id, String path, String user, String targets){
-        targets = targets == null ? "null" : targets;
+    public String getMsg(String id, String path, String user, String target){
+        target = target == null ? "null" : target;
+        
+        return getMsg(id, path, user, Collections.singletonList(target));
+    }
+    
+    public String getMsg(String id, String path, String user, List<String> targets){
+        String targetReplacement = targets.isEmpty() ? "null" : getMessageUtil().getFormattedMembers(id, targets.toArray(new String[0]));
         
         return getMsg(id, path, user)
-                .replace("{target}", targets)
-                .replace("{targets}", getMessageUtil().replaceLast(targets, ",", " " + getMsg(id, "misc.and")));
+                .replace("{target}", targetReplacement)
+                .replace("{targets}", targetReplacement);
     }
     
     public String getMsg(String id, String path, String user){
+        return getMsg(id, path, user, true);
+    }
+    
+    public String getMsg(String id, String path, String user, boolean format){
+        if(format)
+            user = getMessageUtil().getFormattedMembers(id, user);
+        
         return getMsg(id, path).replace("{user}", user);
     }
     
@@ -291,6 +310,8 @@ public class PurrBot {
     }
     
     public String getRandomMsg(String id, String path, String user){
+        user = getMessageUtil().getFormattedMembers(id, user);
+        
         return getRandomMsg(id, path).replace("{user}", user);
     }
     
@@ -319,10 +340,6 @@ public class PurrBot {
                     .addAuthToken(
                             Site.DISCORD_BOATS,
                             getFileManager().getString("config", "tokens.discord-boats")
-                    )
-                    .addAuthToken(
-                            Site.DISCORDBOTLIST_COM,
-                            getFileManager().getString("config", "tokens.discordbotlist-com")
                     )
                     .build();
     
@@ -379,47 +396,16 @@ public class PurrBot {
     }
     
     private String setPlaceholders(String msg){
-        return msg
-                // Emotes
-                .replace("{BLOBHOLO}", Emotes.BLOB_HOLO.getEmote())
-                .replace("{LOADING}", Emotes.LOADING.getEmote())
-                .replace("{NEKOWO}", Emotes.NEKOWO.getEmote())
-                .replace("{SENKOTAILWAG}", Emotes.SENKO_TAIL_WAG.getEmote())
-                .replace("{SHIROTAILWAG}", Emotes.SHIRO_TAIL_WAG.getEmote())
-                .replace("{TYPING}", Emotes.TYPING.getEmote())
-                .replace("{VANILLABLUSH}", Emotes.BLUSH.getEmote())
-                .replace("{EDIT}", Emotes.EDIT.getEmote())
-                .replace("{DOWNLOAD}", Emotes.DOWNLOAD.getEmote())
-                .replace("{DISCORD}", Emotes.DISCORD.getEmote())
-                .replace("{TAIL}", Emotes.TAIL.getEmote())
-                .replace("{SEX}", Emotes.SEX.getEmote())
-                .replace("{ANAL}", Emotes.SEX_ANAL.getEmote())
-                .replace("{YAOI}", Emotes.SEX_YAOI.getEmote())
-                .replace("{YURI}", Emotes.SEX_YURI.getEmote())
-                .replace("{ACCEPT}", Emotes.ACCEPT.getEmote())
-                .replace("{CANCEL}", Emotes.CANCEL.getEmote())
-                .replace("{BOTICON}", Emotes.BOT_ICON.getEmote())
-                .replace("{CATEGORY}", Emotes.CATEGORY.getEmote())
-                .replace("{TEXTCHANNEL}", Emotes.TEXT_CHANNEL.getEmote())
-                .replace("{VOICECHANNEL}", Emotes.VOICE_CHANNEL.getEmote())
-                .replace("{MEMBERS}", Emotes.MEMBERS.getEmote())
-                .replace("{FACE}", Emotes.FACE.getEmote())
-                .replace("{PAYPAL}", Emotes.PAYPAL.getEmote())
-                .replace("{PATREON}", Emotes.PATREON.getEmote())
-                .replace("{KOFI}", Emotes.KOFI.getEmote())
-                .replace("{PURR}", Emotes.PURR.getEmote())
-                .replace("{SNUGGLE}", Emotes.SNUGGLE.getEmote())
-                .replace("{AWOO}", Emotes.AWOO.getEmote())
-                
+        return Emotes.getWithEmotes(msg)
                 // Guild link
                 .replace("{guild_invite}", Links.DISCORD)
-                
+        
                 // Wiki pages
                 .replace("{wiki}", Links.WIKI)
                 .replace("{wiki_bg}", Links.WIKI + "/welcome-images#backgrounds")
                 .replace("{wiki_icon}", Links.WIKI + "/welcome-images#icons")
                 .replace("{wiki_welcome}", Links.WIKI + "/welcome-channel")
-                
+        
                 // Other pages
                 .replace("{github_url}", Links.GITHUB)
                 .replace("{twitter_url}", Links.TWITTER)
@@ -480,8 +466,6 @@ public class PurrBot {
     
     private void updateGuild(String id, String key, String value, BiConsumer<GuildSettings, String> mutator){
         GuildSettings settings = getGuildSettings(id);
-        if(settings == null)
-            settings = getGuildSettings(id);
         
         mutator.accept(settings, value);
         getDbUtil().updateSettings(id, key, value);

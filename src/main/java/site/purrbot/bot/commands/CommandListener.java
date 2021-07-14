@@ -56,6 +56,11 @@ public class CommandListener extends ListenerAdapter{
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event){
         CMD_EXECUTOR.execute(() -> {
+            // Temporary Fix for Stage-channel issues
+            // TODO: Remove once fixed
+            if(!event.getChannel().getType().equals(ChannelType.TEXT))
+                return;
+            
             Message msg = event.getMessage();
             Guild guild = event.getGuild();
             User user = event.getAuthor();
@@ -97,9 +102,7 @@ public class CommandListener extends ListenerAdapter{
                 if(!mentionMatcher.group(1).equalsIgnoreCase(self.getId()))
                     return;
                 
-                tc.sendMessage(
-                        bot.getMsg(guild.getId(), "misc.info", user.getAsMention())
-                ).queue();
+                msg.reply(bot.getMsg(guild.getId(), "misc.info", member.getEffectiveName())).queue();
                 return;
             }
             
@@ -116,8 +119,8 @@ public class CommandListener extends ListenerAdapter{
                 return;
             
             if(!self.hasPermission(tc, Permission.MESSAGE_WRITE)){
-                if(self.hasPermission(tc, Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_EXT_EMOJI))
-                    msg.addReaction(Emotes.CANCEL.getNameAndId()).queue();
+                if(self.hasPermission(tc, Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_HISTORY))
+                    msg.addReaction(Emotes.DENY.getNameAndId()).queue();
                 
                 return;
             }
@@ -151,7 +154,8 @@ public class CommandListener extends ListenerAdapter{
             }
             
             try{
-                HANDLER.execute(command, msg, args[1] == null ? "" : args[1], args[0]);
+                String arguments = args[1] == null ? "" : args[1];
+                HANDLER.execute(command, msg, arguments, args[0]);
             }catch(Exception ex){
                 logger.error("Couldn't perform command {}!", args[0], ex);
                 bot.getEmbedUtil().sendError(tc, member, "errors.unknown", ex.getMessage(), false);

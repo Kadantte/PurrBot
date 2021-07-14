@@ -26,7 +26,6 @@ import net.dv8tion.jda.api.entities.*;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 @CommandDescription(
@@ -46,7 +45,7 @@ import java.io.InputStream;
                         "{p}welcome color reset\n" +
                         "{p}welcome icon set <icon>\n" +
                         "{p}welcome icon reset\n" +
-                        "{p}welcome msg <message>\n" +
+                        "{p}welcome msg set <message>\n" +
                         "{p}welcome msg reset\n" +
                         "{p}welcome test"
                 ),
@@ -65,17 +64,12 @@ public class CmdWelcome implements Command{
     public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
         if(args.length < 1){
             tc.sendTyping().queue(v -> {
-                InputStream image;
-                try{
-                    image = bot.getImageUtil().getWelcomeImg(
-                            msg.getMember(),
-                            bot.getWelcomeIcon(guild.getId()),
-                            bot.getWelcomeBg(guild.getId()),
-                            bot.getWelcomeColor(guild.getId())
-                    );
-                }catch(IOException ex){
-                    image = null;
-                }
+                InputStream image = bot.getImageUtil().getWelcomeImg(
+                        msg.getMember(),
+                        bot.getWelcomeIcon(guild.getId()),
+                        bot.getWelcomeBg(guild.getId()),
+                        bot.getWelcomeColor(guild.getId())
+                );
                 
                 welcomeSettings(tc, member, image);
             });
@@ -250,7 +244,7 @@ public class CmdWelcome implements Command{
                             )
                             .build();
                     
-                    tc.sendMessage(embed).queue();
+                    tc.sendMessageEmbeds(embed).queue();
                     return;
                 }
                 if(args[1].equalsIgnoreCase("reset")){
@@ -267,17 +261,12 @@ public class CmdWelcome implements Command{
             
             case "test":
                 tc.sendTyping().queue(v -> {
-                    InputStream image;
-                    try{
-                        image = bot.getImageUtil().getWelcomeImg(
-                                member,
-                                bot.getWelcomeIcon(guild.getId()),
-                                bot.getWelcomeBg(guild.getId()),
-                                bot.getWelcomeColor(guild.getId())
-                        );
-                    }catch(IOException ex){
-                        image = null;
-                    }
+                    InputStream image = bot.getImageUtil().getWelcomeImg(
+                            member,
+                            bot.getWelcomeIcon(guild.getId()),
+                            bot.getWelcomeBg(guild.getId()),
+                            bot.getWelcomeColor(guild.getId())
+                    );
                     
                     bot.getMessageUtil().sendWelcomeMsg(tc, bot.getWelcomeMsg(guild.getId()), member, image);
                 });
@@ -285,17 +274,12 @@ public class CmdWelcome implements Command{
 
             default:
                 tc.sendTyping().queue(v -> {
-                    InputStream image;
-                    try{
-                        image = bot.getImageUtil().getWelcomeImg(
-                                member,
-                                bot.getWelcomeIcon(guild.getId()),
-                                bot.getWelcomeBg(guild.getId()),
-                                bot.getWelcomeColor(guild.getId())
-                        );
-                    }catch(IOException ex){
-                        image = null;
-                    }
+                    InputStream image = bot.getImageUtil().getWelcomeImg(
+                            member,
+                            bot.getWelcomeIcon(guild.getId()),
+                            bot.getWelcomeBg(guild.getId()),
+                            bot.getWelcomeColor(guild.getId())
+                    );
     
                     welcomeSettings(tc, member, image);
                 });
@@ -346,7 +330,7 @@ public class CmdWelcome implements Command{
                 );
         
         if(file == null || !guild.getSelfMember().hasPermission(tc, Permission.MESSAGE_ATTACH_FILES)){
-            tc.sendMessage(embed.build()).queue();
+            tc.sendMessageEmbeds(embed.build()).queue();
         }else{
             embed.addField(
                     bot.getMsg(guild.getId(), "purr.guild.welcome.embed.preview"),
@@ -355,7 +339,7 @@ public class CmdWelcome implements Command{
             )
                     .setImage("attachment://welcome_preview.jpg");
             
-            tc.sendMessage(embed.build())
+            tc.sendMessageEmbeds(embed.build())
                     .addFile(file, "welcome_preview.jpg")
                     .queue();
         }
@@ -391,7 +375,7 @@ public class CmdWelcome implements Command{
                 value = getMsg(value);
         }
         
-        tc.sendMessage(
+        tc.sendMessageEmbeds(
                 bot.getEmbedUtil().getEmbed(member)
                         .setColor(0x00FF00)
                         .setDescription(
@@ -427,7 +411,7 @@ public class CmdWelcome implements Command{
                 bot.setWelcomeMsg(id, "Welcome {mention}!");
         }
         
-        tc.sendMessage(
+        tc.sendMessageEmbeds(
                 bot.getEmbedUtil().getEmbed(member)
                         .setColor(0x00FF00)
                         .setDescription(

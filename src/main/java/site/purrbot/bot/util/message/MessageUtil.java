@@ -18,40 +18,28 @@
 
 package site.purrbot.bot.util.message;
 
-import ch.qos.logback.classic.Logger;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import org.slf4j.LoggerFactory;
 import site.purrbot.bot.PurrBot;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.InputStream;
 import java.text.DecimalFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
+import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MessageUtil {
 
     private final PurrBot bot;
-    private final DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("dd. MMM yyyy HH:mm:ss");
-    private final Logger logger = (Logger)LoggerFactory.getLogger("MessageUtil");
     
     private final Pattern placeholder = Pattern.compile("(\\{(.+?)})", Pattern.CASE_INSENSITIVE);
     private final Pattern rolePattern = Pattern.compile("(\\{r_(name|mention):(\\d+)})", Pattern.CASE_INSENSITIVE);
     private final Pattern channelPattern = Pattern.compile("(\\{c_(name|mention):(\\d+)})", Pattern.CASE_INSENSITIVE);
     
     private final DecimalFormat decimalFormat = new DecimalFormat("#,###,###");
-    
-    private final Cache<String, String> queue = Caffeine.newBuilder()
-            .expireAfterWrite(2, TimeUnit.MINUTES)
-            .build();
 
     public MessageUtil(PurrBot bot){
         this.bot = bot;
@@ -75,9 +63,14 @@ public class MessageUtil {
         );
     }
 
-    public String formatTime(LocalDateTime time){
-        LocalDateTime utcTime = LocalDateTime.from(time.atOffset(ZoneOffset.UTC));
-        return utcTime.format(timeFormat) + " UTC";
+    public String formatTime(TemporalAccessor time){
+        long timestamp = (Instant.from(time).toEpochMilli() / 1000);
+        
+        return String.format(
+                "<t:%d:f> (<t:%d:R>)",
+                timestamp,
+                timestamp
+        );
     }
 
     public Color getColor(String input){
@@ -105,8 +98,11 @@ public class MessageUtil {
             case "hex":
                 if(value.isEmpty())
                     return null;
-                
-                color = Color.decode(value.startsWith("#") ? value : "#" + value);
+                try{
+                    color = Color.decode(value.startsWith("#") ? value : "#" + value);
+                }catch(NumberFormatException ignored){
+                    return null;
+                }
                 break;
             
             case "rgb":
@@ -117,7 +113,7 @@ public class MessageUtil {
                 
                 try{
                     color = new Color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]));
-                }catch(Exception ignored){
+                }catch(NumberFormatException ignored){
                     return null;
                 }
         }
@@ -183,14 +179,10 @@ public class MessageUtil {
                         break;
                     
                     case "mention":
-                        if(!channel.getType().equals(ChannelType.TEXT))
+                        if(channel.getType().equals(ChannelType.CATEGORY))
                             continue;
                         
-                        TextChannel tc = guild.getTextChannelById(channelMatcher.group(3));
-                        if(tc == null)
-                            continue;
-                        
-                        channelMatcher.appendReplacement(builder, tc.getAsMention());
+                        channelMatcher.appendReplacement(builder, channel.getAsMention());
                         break;
                 }
             }while(channelMatcher.find());
@@ -247,6 +239,21 @@ public class MessageUtil {
         return String.format(game, formatNumber(guilds));
     }
     
+    public String getFormattedMembers(String id, String... members){
+        if(members.length == 1)
+            return "**" + escapeAll(members[0]) + "**";
+        
+        StringBuilder builder = new StringBuilder();
+        for(String member : members){
+            if(builder.length() > 0)
+                builder.append(", ");
+            
+            builder.append("**").append(escapeAll(member)).append("**");
+        }
+        
+        return replaceLast(builder.toString(), ",", " " + bot.getMsg(id, "misc.and"));
+    }
+    
     public String replaceLast(String input, String target, String replacement){
         if(!input.contains(target))
             return input;
@@ -274,5 +281,12 @@ public class MessageUtil {
         }
         
         return false;
+    }
+    
+    private String escapeAll(String name){
+        return name.replace("*", "\\*")
+                .replace("_", "\\_")
+                .replace("`", "\\`")
+                .replace("~", "\\~");
     }
 }

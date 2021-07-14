@@ -26,7 +26,6 @@ import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 import site.purrbot.bot.constants.Emotes;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @CommandDescription(
@@ -49,62 +48,141 @@ public class CmdGuild implements Command{
     
     @Override
     public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
-        EmbedBuilder guildInfo = bot.getEmbedUtil().getEmbed(member)
+        guild.loadMembers().onSuccess(members -> sendGuildInfo(guild, tc, member, members))
+                .onError(e -> sendGuildInfo(guild, tc, member, null));
+    }
+    
+    private void sendGuildInfo(Guild guild, TextChannel tc, Member member, List<Member> members){
+        EmbedBuilder info = bot.getEmbedUtil().getEmbed(member)
                 .setTitle(guild.getName())
-                .setThumbnail(guild.getIconUrl())
-                .addField(
-                        EmbedBuilder.ZERO_WIDTH_SPACE,
-                        String.format(
-                                "**%s**: %s\n" +
-                                "**%s**: `%s`\n" +
-                                "\n" +
-                                "**%s**: %s %s\n" +
-                                "**%s**: %s\n" +
-                                "\n" +
-                                "**%s**: %s",
-                                bot.getMsg(guild.getId(), "purr.info.guild.embed.owner"),
-                                getOwner(guild),
-                                bot.getMsg(guild.getId(), "purr.info.guild.embed.created"),
-                                bot.getMessageUtil().formatTime(LocalDateTime.from(guild.getTimeCreated())),
-                                bot.getMsg(guild.getId(), "purr.info.guild.embed.region"),
-                                guild.getRegion().getEmoji(),
-                                guild.getRegion().getName(),
-                                bot.getMsg(guild.getId(), "purr.info.guild.embed.levels.title"),
-                                getVerifyLevel(guild),
-                                bot.getMsg(guild.getId(), "purr.info.guild.embed.boost.title"),
-                                getBoostMessage(guild)
-                        ),
-                        false
-                )
-                .addField(
-                        EmbedBuilder.ZERO_WIDTH_SPACE,
-                        String.format(
-                                "**%s**\n" +
-                                "%s\n" +
-                                "\n" +
-                                "**%s**\n" +
-                                "%s",
-                                bot.getMsg(guild.getId(), "purr.info.guild.embed.members_title"),
-                                getMembers(guild),
-                                bot.getMsg(guild.getId(), "purr.info.guild.embed.channels_title"),
-                                getChannels(guild)
-                        ),
-                        false
-                );
+                .setThumbnail(guild.getIconUrl());
         
-        getGuildFeatures(guild, guildInfo);
+        setGenericInfo(guild, info);
+        setMembersAndChannels(guild, info, members);
+        setGuildFeatures(guild, info);
         
-        if(guild.getBannerUrl() != null)
-            guildInfo.addField(
+        if(guild.getBannerUrl() != null){
+            info.addField(
                     EmbedBuilder.ZERO_WIDTH_SPACE,
                     "**" + bot.getMsg(guild.getId(), "purr.info.guild.embed.features.banner") + "**",
                     false
             ).setImage(guild.getBannerUrl() + "?size=512");
+        }
         
-        tc.sendMessage(guildInfo.build()).queue();
+        tc.sendMessageEmbeds(info.build()).queue();
     }
     
-    private void getGuildFeatures(Guild guild, EmbedBuilder builder){
+    private void setGenericInfo(Guild guild, EmbedBuilder builder){
+        builder.addField(
+                EmbedBuilder.ZERO_WIDTH_SPACE,
+                String.format(
+                        "%s\n" +
+                        "%s\n" +
+                        "\n" +
+                        "%s\n" +
+                        "\n" +
+                        "%s",
+                        getOwner(guild),
+                        getCreationDate(guild),
+                        getVerificationLevel(guild),
+                        getBoostLevel(guild)
+                ),
+                false
+        );
+    }
+    
+    private void setMembersAndChannels(Guild guild, EmbedBuilder builder, List<Member> members){
+        builder.addField(
+                EmbedBuilder.ZERO_WIDTH_SPACE,
+                String.format(
+                        "%s\n" +
+                        "\n" +
+                        "%s",
+                        getMembers(guild, members),
+                        getChannels(guild)
+                ),
+                false
+        );
+    }
+    
+    private String getOwner(Guild guild){
+        Member owner = guild.getOwner();
+        String unknown = bot.getMsg(guild.getId(), "misc.unknown_user");
+    
+        return String.format(
+                "**%s**: %s | %s",
+                bot.getMsg(guild.getId(), "purr.info.guild.embed.owner"),
+                owner == null ? unknown : owner.getAsMention(),
+                owner == null ? unknown : owner.getEffectiveName()
+        );
+    }
+    
+    private String getCreationDate(Guild guild){
+        return String.format(
+                "**%s**: %s",
+                bot.getMsg(guild.getId(), "purr.info.guild.embed.created"),
+                bot.getMessageUtil().formatTime(guild.getTimeCreated())
+        );
+    }
+    
+    private String getVerificationLevel(Guild guild){
+        return String.format(
+                "**%s**: %s",
+                bot.getMsg(guild.getId(), "purr.info.guild.embed.levels.title"),
+                getLevelName(guild)
+        );
+    }
+    
+    private String getBoostLevel(Guild guild){
+        return String.format(
+                "**%s**: %s",
+                bot.getMsg(guild.getId(), "purr.info.guild.embed.boost.title"),
+                getBoostMessage(guild)
+        );
+    }
+    
+    private String getMembers(Guild guild, List<Member> members){
+        String title = bot.getMsg(guild.getId(), "purr.info.guild.embed.members_title");
+        if(members == null){
+            return String.format(
+                    "**%s**\n" +
+                    "`?`",
+                    title
+            );
+        }
+        
+        int total = members.size();
+        long humans = members.stream().filter(member -> !member.getUser().isBot()).count();
+        long bots = members.stream().filter(member -> member.getUser().isBot()).count();
+        
+        return String.format(
+                "**%s**\n" +
+                "%s",
+                title,
+                bot.getMsg(guild.getId(), "purr.info.guild.embed.members_value")
+                        .replace("{members_total}", bot.getMessageUtil().formatNumber(total))
+                        .replace("{members_human}", bot.getMessageUtil().formatNumber(humans))
+                        .replace("{members_bot}", bot.getMessageUtil().formatNumber(bots))
+        );
+    }
+    
+    private String getChannels(Guild guild){
+        long total = guild.getChannels().stream().filter(chan -> !chan.getType().equals(ChannelType.CATEGORY)).count();
+        long text  = guild.getChannels().stream().filter(chan -> chan.getType().equals(ChannelType.TEXT)).count();
+        long voice = guild.getChannels().stream().filter(chan -> chan.getType().equals(ChannelType.VOICE)).count();
+        
+        return String.format(
+                "**%s**\n" +
+                "%s",
+                bot.getMsg(guild.getId(), "purr.info.guild.embed.channels_title"),
+                bot.getMsg(guild.getId(), "purr.info.guild.embed.channels_value")
+                        .replace("{channels_total}", bot.getMessageUtil().formatNumber(total))
+                        .replace("{channels_text}", bot.getMessageUtil().formatNumber(text))
+                        .replace("{channels_voice}", bot.getMessageUtil().formatNumber(voice))
+        );
+    }
+    
+    private void setGuildFeatures(Guild guild, EmbedBuilder builder){
         builder.addField(
                 EmbedBuilder.ZERO_WIDTH_SPACE,
                 String.join(
@@ -136,7 +214,7 @@ public class CmdGuild implements Command{
         );
     }
     
-    private String getVerifyLevel(Guild guild){
+    private String getLevelName(Guild guild){
         Guild.VerificationLevel level = guild.getVerificationLevel();
         
         switch(level){
@@ -162,12 +240,14 @@ public class CmdGuild implements Command{
     }
     
     private String getBoostMessage(Guild guild){
+        int count = guild.getBoostCount();
         String boostMsg;
-        if(guild.getBoostCount() == 1)
+        if(count == 1){
             boostMsg = bot.getMsg(guild.getId(), "purr.info.guild.embed.boost.single");
-        else
+        }else{
             boostMsg = bot.getMsg(guild.getId(), "purr.info.guild.embed.boost.multiple")
-                    .replace("{boost}", String.valueOf(guild.getBoostCount()));
+                    .replace("{boost}", String.valueOf(count));
+        }
         
         return bot.getMsg(guild.getId(), "purr.info.guild.embed.boost.value")
                 .replace("{boosts}", boostMsg)
@@ -180,91 +260,53 @@ public class CmdGuild implements Command{
             default:
             case NONE:
             case UNKNOWN:
-                return Emotes.BOOST_TIER_0.getEmote();
+                return "";
             
             case TIER_1:
-                return Emotes.BOOST_TIER_1.getEmote();
+                return " " + Emotes.BOOST_LEVEL_1.getEmote();
             
             case TIER_2:
-                return Emotes.BOOST_TIER_2.getEmote();
+                return " " + Emotes.BOOST_LEVEL_2.getEmote();
             
             case TIER_3:
-                return Emotes.BOOST_TIER_3.getEmote();
+                return " " + Emotes.BOOST_LEVEL_3.getEmote();
         }
-    }
-    
-    private String getOwner(Guild guild){
-        Member member = guild.getOwner();
-        if(member == null)
-            return bot.getMsg(guild.getId(), "misc.unknown_user");
-        
-        return String.format(
-                "%s | %s",
-                member.getAsMention(),
-                member.getEffectiveName()
-        );
-    }
-    
-    private String getMembers(Guild guild){
-        List<Member> members = guild.loadMembers().get();
-        int total = members.size();
-        long humans = members.stream().filter(member -> !member.getUser().isBot()).count();
-        long bots = members.stream().filter(member -> member.getUser().isBot()).count();
-        
-        return bot.getMsg(guild.getId(), "purr.info.guild.embed.members_value")
-                .replace("{members_total}", bot.getMessageUtil().formatNumber(total))
-                .replace("{members_human}", bot.getMessageUtil().formatNumber(humans))
-                .replace("{members_bot}", bot.getMessageUtil().formatNumber(bots));
-    }
-    
-    private String getChannels(Guild guild){
-        long total = guild.getChannels().stream().filter(chan -> !chan.getType().equals(ChannelType.CATEGORY)).count();
-        long text  = guild.getChannels().stream().filter(chan -> chan.getType().equals(ChannelType.TEXT)).count();
-        long voice = guild.getChannels().stream().filter(chan -> chan.getType().equals(ChannelType.VOICE)).count();
-        
-        return bot.getMsg(guild.getId(), "purr.info.guild.embed.channels_value")
-                .replace("{channels_total}", bot.getMessageUtil().formatNumber(total))
-                .replace("{channels_text}", bot.getMessageUtil().formatNumber(text))
-                .replace("{channels_voice}", bot.getMessageUtil().formatNumber(voice));
     }
     
     private enum Feature{
-        ANIMATED_ICON      ("ANIMATED_ICON",                    "animated_icon",       Emotes.GIF_ON,       Emotes.GIF_OFF),
-        BANNER             ("BANNER",                           "banner",              Emotes.IMAGE_ON,     Emotes.IMAGE_OFF),
-        COMMERCE           ("COMMERCE",                         "store_channel",       Emotes.STORE_ON,     Emotes.STORE_OFF),
-        COMMUNITY          ("COMMUNITY",                        "community",           Emotes.COMMUNITY_ON, Emotes.COMMUNITY_OFF),
-        DISCOVERABLE       ("DISCOVERABLE",                     "discoverable",        Emotes.DISCOVER_ON,  Emotes.DISCOVER_OFF),
-        INVITE_SPLASH      ("INVITE_SPLASH",                    "invite_screen",       Emotes.IMAGE_ON,     Emotes.IMAGE_OFF),
-        MEMBER_VERIFICATION("MEMBER_VERIFICATION_GATE_ENABLED", "member_verification", Emotes.SCREEN_ON,    Emotes.SCREEN_OFF),
-        NEWS               ("NEWS",                             "news_channel",        Emotes.NEWS_ON,      Emotes.NEWS_OFF),
-        PARTNERED          ("PARTNERED",                        "partnered",           Emotes.PARTNER_ON,   Emotes.PARTNER_OFF),
-        PREVIEW            ("PREVIEW_ENABLED",                  "guild_preview",       Emotes.PREVIEW_ON,   Emotes.PREVIEW_OFF),
-        VANITY_URL         ("VANITY_URL",                       "vanity_url",          Emotes.INVITE_ON,    Emotes.INVITE_OFF),
-        VERIFIED           ("VERIFIED",                         "verified",            Emotes.VERIFIED_ON,  Emotes.VERIFIED_OFF),
-        VIP_REGIONS        ("VIP_REGIONS",                      "vip_voice",           Emotes.VIP_VOICE_ON, Emotes.VIP_VOICE_OFF),
-        WELCOME_SCREEN     ("WELCOME_SCREEN_ENABLED",           "welcome_screen",      Emotes.SCREEN_ON,    Emotes.SCREEN_OFF);
+        ANIMATED_ICON      ("ANIMATED_ICON",                    "animated_icon",       Emotes.GIF),
+        BANNER             ("BANNER",                           "banner",              Emotes.IMAGES),
+        COMMERCE           ("COMMERCE",                         "store_channel",       Emotes.STORE),
+        COMMUNITY          ("COMMUNITY",                        "community",           Emotes.MEMBERS),
+        DISCOVERABLE       ("DISCOVERABLE",                     "discoverable",        Emotes.DISCOVER),
+        INVITE_SPLASH      ("INVITE_SPLASH",                    "invite_screen",       Emotes.IMAGES),
+        MEMBER_VERIFICATION("MEMBER_VERIFICATION_GATE_ENABLED", "member_verification", Emotes.RICH_RPESENCE),
+        NEWS               ("NEWS",                             "news_channel",        Emotes.NEWS),
+        PARTNERED          ("PARTNERED",                        "partnered",           Emotes.PARTNER),
+        PREVIEW            ("PREVIEW_ENABLED",                  "guild_preview",       Emotes.RICH_RPESENCE),
+        VANITY_URL         ("VANITY_URL",                       "vanity_url",          Emotes.INVITE),
+        VERIFIED           ("VERIFIED",                         "verified",            Emotes.VERIFIED),
+        VIP_REGIONS        ("VIP_REGIONS",                      "vip_voice",           Emotes.VOICE),
+        WELCOME_SCREEN     ("WELCOME_SCREEN_ENABLED",           "welcome_screen",      Emotes.RICH_RPESENCE);
         
         private final String feature;
         private final String name;
-        private final Emotes active;
-        private final Emotes inactive;
+        private final Emotes emote;
         
-        Feature(String feature, String name, Emotes active, Emotes inactive){
+        Feature(String feature, String name, Emotes emote){
             this.feature = feature;
             this.name = name;
-            this.active = active;
-            this.inactive = inactive;
+            this.emote = emote;
         }
         
         public String getString(PurrBot bot, Guild guild){
-            String emote = guild.getFeatures().contains(this.feature) ? active.getEmote() : inactive.getEmote();
             String msg = bot.getMsg(guild.getId(), "purr.info.guild.embed.features." + name);
             
             if(this == Feature.VANITY_URL){
                 if(guild.getVanityUrl() != null){
                     return String.format(
                             "%s [`%s`](%s)",
-                            emote,
+                            emote.getEmote(),
                             msg,
                             guild.getVanityUrl()
                     );
@@ -273,7 +315,7 @@ public class CmdGuild implements Command{
             
             return String.format(
                     "%s %s",
-                    emote,
+                    emote.getEmote(),
                     guild.getFeatures().contains(feature) ? "`" + msg + "`" : "~~`" + msg + "`~~"
             );
         }
