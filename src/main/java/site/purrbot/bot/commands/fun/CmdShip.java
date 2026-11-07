@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -22,16 +22,20 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.rainestormee.jdacommand.CommandAttribute;
 import com.github.rainestormee.jdacommand.CommandDescription;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 import site.purrbot.bot.constants.IDs;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -41,9 +45,9 @@ import java.util.concurrent.TimeUnit;
         description = "purr.fun.ship.description",
         triggers = {"ship", "shipping"},
         attributes = {
-                @CommandAttribute(key = "category", value = "fun"),
-                @CommandAttribute(key = "usage", value = "{p}ship <@user> [@user]"),
-                @CommandAttribute(key = "help", value = "{p}ship <@user> [@user]")
+            @CommandAttribute(key = "category", value = "fun"),
+            @CommandAttribute(key = "usage", value = "{p}ship <@user> [@user]"),
+            @CommandAttribute(key = "help", value = "{p}ship <@user> [@user]")
         }
 )
 public class CmdShip implements Command{
@@ -60,12 +64,9 @@ public class CmdShip implements Command{
     }
 
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
         Member member1;
         Member member2;
-
-        List<Member> members = msg.getMentionedMembers();
-
         if (members.isEmpty()){
             bot.getEmbedUtil().sendError(tc, member, "purr.fun.ship.no_mention");
             return;
@@ -101,11 +102,9 @@ public class CmdShip implements Command{
                     if(img != null && guild.getSelfMember().hasPermission(tc, Permission.MESSAGE_ATTACH_FILES)){
                         tc.sendMessage(
                                 bot.getMsg(guild.getId(), "purr.fun.ship.special_user", member.getAsMention())
-                        ).addFile(img, String.format(
-                                "love_%s_%s.png",
-                                member1.getId(),
-                                member2.getId()
-                        )).queue();
+                            )
+                            .addFiles(FileUpload.fromData(img, String.format("love_%s_%s.png", member1.getId(), member2.getId())))
+                            .queue();
                         return;
                     }
                     
@@ -118,6 +117,8 @@ public class CmdShip implements Command{
                         bot.getMsg(guild.getId(), "purr.fun.ship.mention_purr", member.getAsMention())
                 ).queue();
             }
+            msg.addReaction(Emoji.fromUnicode("\uD83D\uDE33")).queue();
+            
             return;
         }
 
@@ -157,22 +158,28 @@ public class CmdShip implements Command{
         image = bot.getImageUtil().getShipImg(member1, member2, result);
 
         if(image == null || !guild.getSelfMember().hasPermission(tc, Permission.MESSAGE_ATTACH_FILES)){
-            Message message = new MessageBuilder(String.format(
-                    "`%d%%` | %s",
-                    result,
-                    getMessage(result, guild.getId())
-            )).build();
+            MessageCreateData message = new MessageCreateBuilder()
+                .addContent(String.format("`%d%%` | %s", result, getMessage(result, guild.getId())))
+                .build();
 
             tc.sendMessage(message).queue();
             return;
         }
 
-        tc.sendMessage(getMessage(result, guild.getId())).addFile(image, String.format(
-                "love_%s_%s.png",
-                member1.getId(),
-                member2.getId()
-        )).queue();
+        tc.sendMessage(getMessage(result, guild.getId()))
+            .addFiles(FileUpload.fromData(image, String.format("love_%s_%s.png", member1.getId(), member2.getId())))
+            .queue();
 
+    }
+    
+    @Override
+    public EnumSet<Permission> getPermissions(){
+        return EnumSet.of(
+            Permission.MESSAGE_ATTACH_FILES,
+            Permission.MESSAGE_EMBED_LINKS,
+            Permission.MESSAGE_ADD_REACTION,
+            Permission.MESSAGE_EXT_EMOJI
+        );
     }
     
     private String getMessage(int chance, String id){

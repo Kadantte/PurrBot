@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -22,13 +22,13 @@ import com.github.rainestormee.jdacommand.CommandAttribute;
 import com.github.rainestormee.jdacommand.CommandDescription;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.utils.MarkdownSanitizer;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 import site.purrbot.bot.constants.Emotes;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @CommandDescription(
@@ -36,9 +36,9 @@ import java.util.List;
         description = "purr.info.user.description",
         triggers = {"user", "member", "userinfo", "memberinfo"},
         attributes = {
-                @CommandAttribute(key = "category", value = "info"),
-                @CommandAttribute(key = "usage", value = "{p}user [@user]"),
-                @CommandAttribute(key = "help", value = "{p}user [@user]")
+            @CommandAttribute(key = "category", value = "info"),
+            @CommandAttribute(key = "usage", value = "{p}user [@user]"),
+            @CommandAttribute(key = "help", value = "{p}user [@user]")
         }
 )
 public class CmdUser implements Command{
@@ -50,8 +50,8 @@ public class CmdUser implements Command{
     }
 
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args) {
-        Member target = msg.getMentionedMembers().isEmpty() ? member : msg.getMentionedMembers().get(0);
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args) {
+        Member target = members.isEmpty() ? member : members.get(0);
         
         EmbedBuilder embed = bot.getEmbedUtil().getEmbed(member)
                 .setThumbnail(target.getUser().getEffectiveAvatarUrl())
@@ -85,22 +85,22 @@ public class CmdUser implements Command{
                         true
                 )
                 .addField(
-                        bot.getMsg(guild.getId(), "purr.info.user.embed.role_total"),
-                        getRoles(target),
+                        EmbedBuilder.ZERO_WIDTH_SPACE,
+                        String.format(
+                                "**%s**\n" +
+                                "%s",
+                                bot.getMsg(guild.getId(), "purr.info.user.embed.role_total"),
+                                getRoles(target)
+                        ),
                         false
                 )
                 .addField(
-                        bot.getMsg(guild.getId(), "purr.info.user.embed.dates"),
-                        String.format(
-                                "```yaml\n" +
-                                "%s\n" +
-                                "```",
-                                getTimes(target)
-                        ),
+                        EmbedBuilder.ZERO_WIDTH_SPACE,
+                        getTimes(target),
                         false
                 );
 
-        tc.sendMessage(embed.build()).queue();
+        tc.sendMessageEmbeds(embed.build()).queue();
     }
     
     private String getRoles(Member member){
@@ -141,9 +141,9 @@ public class CmdUser implements Command{
         User user = member.getUser();
         if(user.isBot())
             if(user.getFlags().contains(User.UserFlag.VERIFIED_BOT))
-                sb.append(" ").append(Emotes.VERIFIED_BOT_1.getEmote()).append(Emotes.VERIFIED_BOT_2.getEmote());
+                sb.append(" ").append(Emotes.VERIFIED_BOT_TAG_1.getEmote()).append(Emotes.VERIFIED_BOT_TAG_2.getEmote());
             else
-                sb.append(" ").append(Emotes.BOT_1.getEmote()).append(Emotes.BOT_2.getEmote());
+                sb.append(" ").append(Emotes.BOT_TAG_1.getEmote()).append(Emotes.BOT_TAG_2.getEmote());
         
         return sb.toString();
     }
@@ -170,18 +170,24 @@ public class CmdUser implements Command{
         StringBuilder sb = new StringBuilder();
         
         sb.append(bot.getMsg(member.getGuild().getId(), "purr.info.user.embed.created"))
-                .append("\n   ")
-                .append(bot.getMessageUtil().formatTime(LocalDateTime.from(member.getTimeCreated())))
-                .append("\n\n")
-                .append(bot.getMsg(member.getGuild().getId(), "purr.info.user.embed.joined"))
-                .append("\n   ")
-                .append(bot.getMessageUtil().formatTime(LocalDateTime.from(member.getTimeJoined())));
+          .append("\n")
+          .append(Emotes.BLANK.getEmote())
+          .append(" ")
+          .append(bot.getMessageUtil().formatTime(member.getTimeCreated()))
+          .append("\n\n")
+          .append(bot.getMsg(member.getGuild().getId(), "purr.info.user.embed.joined"))
+          .append("\n")
+          .append(Emotes.BLANK.getEmote())
+          .append(" ")
+          .append(bot.getMessageUtil().formatTime(member.getTimeJoined()));
         
         if(member.getTimeBoosted() != null)
             sb.append("\n\n")
-                    .append(bot.getMsg(member.getGuild().getId(), "purr.info.user.embed.booster"))
-                    .append("\n   ")
-                    .append(bot.getMessageUtil().formatTime(LocalDateTime.from(member.getTimeBoosted())));
+              .append(bot.getMsg(member.getGuild().getId(), "purr.info.user.embed.booster"))
+              .append("\n")
+              .append(Emotes.BLANK.getEmote())
+              .append(" ")
+              .append(bot.getMessageUtil().formatTime(member.getTimeBoosted()));
         
         return sb.toString();
     }
@@ -201,34 +207,42 @@ public class CmdUser implements Command{
                 case PARTNER:
                     sb.append(Emotes.PARTNER.getEmote());
                     break;
-                
-                case BUG_HUNTER_LEVEL_1:
-                case BUG_HUNTER_LEVEL_2:
-                    sb.append(Emotes.BUGHUNTER.getEmote());
-                    break;
-                
-                case EARLY_SUPPORTER:
-                    sb.append(Emotes.EARLY_SUPPORTER.getEmote());
-                    break;
-                
+    
                 case HYPESQUAD:
                     sb.append(Emotes.HYPESQUAD_EVENTS.getEmote());
                     break;
                 
-                case HYPESQUAD_BALANCE:
-                    sb.append(Emotes.HYPESQUAD_BALANCE.getEmote());
+                case BUG_HUNTER_LEVEL_1:
+                    sb.append(Emotes.BUGHUNTER.getEmote());
                     break;
-                
+    
                 case HYPESQUAD_BRAVERY:
                     sb.append(Emotes.HYPESQUAD_BRAVERY.getEmote());
                     break;
-                
+    
                 case HYPESQUAD_BRILLIANCE:
                     sb.append(Emotes.HYPESQUAD_BRILLIANCE.getEmote());
+                    break;
+    
+                case HYPESQUAD_BALANCE:
+                    sb.append(Emotes.HYPESQUAD_BALANCE.getEmote());
+                    break;
+    
+                case EARLY_SUPPORTER:
+                    sb.append(Emotes.EARLY_SUPPORTER.getEmote());
+                    break;
+                    
+                case BUG_HUNTER_LEVEL_2:
+                    sb.append(Emotes.BUGHUNTER_GOLD.getEmote());
                     break;
                 
                 case VERIFIED_DEVELOPER:
                     sb.append(Emotes.EARLY_VERIFIED_BOT_DEV.getEmote());
+                    break;
+                
+                case CERTIFIED_MODERATOR:
+                    sb.append(Emotes.CERTIFIED_MOD.getEmote());
+                    break;
             }
         }
         

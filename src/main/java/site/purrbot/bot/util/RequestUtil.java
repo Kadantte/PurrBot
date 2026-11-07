@@ -1,14 +1,14 @@
 /*
- *  Copyright 2018 - 2021 Andre601
- *
+ *  Copyright 2018 - 2022 Andre601
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
  *  the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  *  and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all copies or substantial
  *  portions of the Software.
- *
+ *  
  *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
  *  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  *  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
@@ -18,26 +18,32 @@
 
 package site.purrbot.bot.util;
 
-import ch.qos.logback.classic.Logger;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.api.requests.RestAction;
-import net.dv8tion.jda.api.utils.MarkdownSanitizer;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.constants.Emotes;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class RequestUtil{
     
     private final PurrBot bot;
-    private final Logger logger = (Logger)LoggerFactory.getLogger(RequestUtil.class);
+    private final Logger logger = LoggerFactory.getLogger(RequestUtil.class);
     
     private final Cache<String, String> queue = Caffeine.newBuilder()
             .expireAfterWrite(2, TimeUnit.MINUTES)
@@ -51,7 +57,16 @@ public class RequestUtil{
         return api + ":" + guildId + ":" + authorId;
     }
     
-    public void handleReactionEvent(TextChannel tc, Member author, Member target, HttpUtil.ImageAPI api){
+    public Button getButton(String guildId, String buttonId, boolean accept){
+        return Button.of(
+            accept ? ButtonStyle.SUCCESS : ButtonStyle.DANGER,
+            "purr:" + buttonId + (accept ? ":accept" : ":deny"),
+            bot.getMsg(guildId, accept ? "request.buttons.accept" : "request.buttons.deny"),
+            Emoji.fromFormatted((accept ? Emotes.ACCEPT : Emotes.DENY).getEmote())
+        );
+    }
+    
+    public void handleButtonEvent(TextChannel tc, Member author, Member target, HttpUtil.ImageAPI api){
         Guild guild = tc.getGuild();
         
         if(queue.getIfPresent(getQueueString(api.getName(), guild.getId(), author.getId())) != null){
@@ -59,15 +74,18 @@ public class RequestUtil{
             return;
         }
         
+        String text = bot.getMsg(guild.getId(), api.getPath() + "request.message", author.getEffectiveName(), target.getAsMention());
+        
         tc.sendMessage(
-                bot.getMsg(guild.getId(), api.getPath() + "request.message", author.getEffectiveName(), target.getAsMention())
-        ).queue(message -> RestAction.allOf(
-                message.addReaction(Emotes.ACCEPT.getNameAndId()),
-                message.addReaction(Emotes.CANCEL.getNameAndId())
+                bot.getMsg(guild.getId(), "request.message")
+                   .replace("{text}", text)
+        ).setActionRow(
+                getButton(guild.getId(), api.getName(), true),
+                getButton(guild.getId(), api.getName(), false)
         ).queue(
-                v -> handleReaction(message, tc, author, target, api),
+                message -> handleButton(message, tc, author, target, api),
                 e -> bot.getEmbedUtil().sendError(tc, author, "errors.request_error")
-        ));
+        );
     }
     
     public void handleEdit(TextChannel tc, Message msg, HttpUtil.ImageAPI api){
@@ -78,8 +96,8 @@ public class RequestUtil{
         handleEdit(tc, msg, api, author, null);
     }
     
-    public void handleEdit(TextChannel tc, Message msg, HttpUtil.ImageAPI api, Member author, String targets){
-        bot.getHttpUtil().getImage(api).whenComplete(((result, ex) -> {
+    public void handleEdit(TextChannel tc, Message msg, HttpUtil.ImageAPI api, Member author, List<String> targets){
+        bot.getHttpUtil().getImage(api).whenComplete((result, ex) -> {
             Guild guild = tc.getGuild();
             String text;
             
@@ -98,82 +116,87 @@ public class RequestUtil{
                     return;
                 }
                 
-                msg.editMessage(MarkdownSanitizer.escape(text)).queue(message -> { 
-                    if(guild.getSelfMember().hasPermission(tc, Permission.MESSAGE_MANAGE))
-                        message.clearReactions().queue(
-                                null,
-                                e -> logger.warn("Unable to clear reactions from Message! Was the message deleted?")
-                        );
-                    
-                    if(result.isRequest() && author != null)
-                        sendConfirmEmbed(tc, author, targets, message.getJumpUrl());
-                }, e -> tc.sendMessage(MarkdownSanitizer.escape(text)).queue(message -> {
-                    if(result.isRequest() && author != null)
-                        sendConfirmEmbed(tc, author, targets, message.getJumpUrl());
-                }));
+                msg.editMessage(text)
+                   .setComponents(Collections.emptyList())
+                   .queue(message -> {
+                       if(result.isRequest() && author != null) 
+                           sendConfirmation(tc, author, targets, message); 
+                       }, e -> tc.sendMessage(text).queue(message -> { 
+                           if(result.isRequest() && author != null) 
+                               sendConfirmation(tc, author, targets, message); 
+                       }));
                 return;
             }
             
             sendResponse(msg, tc, result, author, targets, text);
-        }));
+        });
     }
     
-    private void handleReaction(Message msg, TextChannel tc, Member author, Member target, HttpUtil.ImageAPI api){
+    private void handleButton(Message msg, TextChannel tc, Member author, Member target, HttpUtil.ImageAPI api){
         queue.put(getQueueString(api.getName(), tc.getGuild().getId(), author.getId()), target.getId());
         
         Guild guild = tc.getGuild();
+        String channelId = tc.getId();
         EventWaiter waiter = bot.getWaiter();
+        
         waiter.waitForEvent(
-                GuildMessageReactionAddEvent.class,
+                ButtonInteractionEvent.class,
                 event -> {
                     if(event.getUser().isBot())
+                        return false;
+                    
+                    if(event.getMember() == null)
+                        return false;
+    
+                    if(!event.isAcknowledged())
+                        event.deferEdit().queue();
+                    
+                    if(!isValidButton(event.getComponentId(), api.getName()))
                         return false;
                     
                     if(!event.getMember().equals(target))
                         return false;
                     
-                    MessageReaction.ReactionEmote emote = event.getReactionEmote();
-                    if(!emote.isEmote())
-                        return false;
-                    
-                    if(!emote.getId().equals(Emotes.ACCEPT.getId()) && !emote.getId().equals(Emotes.CANCEL.getId()))
-                        return false;
-                    
                     return event.getMessageId().equals(msg.getId());
                 },
                 event -> {
-                    TextChannel channel = event.getChannel();
+                    TextChannel channel = event.getGuildChannel().asTextChannel();
                     queue.invalidate(getQueueString(api.getName(), guild.getId(), author.getId()));
                     
-                    if(event.getReactionEmote().getId().equals(Emotes.CANCEL.getId())){
-                        channel.sendMessage(MarkdownSanitizer.escape(
+                    String result = event.getComponentId().split(":")[2];
+                    if(result.equals("deny")){
+                        channel.sendMessage(
                                 bot.getMsg(guild.getId(), api.getPath() + "request.denied", author.getAsMention(), target.getEffectiveName())
-                        )).queue();
+                        ).queue();
                         
                         msg.delete().queue(
                                 null,
                                 e -> logger.warn("Unable to delete Message for {}. Was it already deleted?", api.getName())
                         );
                     }else{
-                        handleEdit(tc, msg, api, author, target.getEffectiveName());
+                        handleEdit(tc, msg, api, author, Collections.singletonList(target.getEffectiveName()));
                     }
                 },
                 1, TimeUnit.MINUTES,
                 () -> {
+                    TextChannel channel = guild.getTextChannelById(channelId);
+                    if(channel == null)
+                        return;
+                    
                     msg.delete().queue(
                             null,
                             e -> logger.warn("Unable to delete Message for {}. Was it already deleted?", api.getName())
                     );
                     queue.invalidate(getQueueString(api.getName(), guild.getId(), author.getId()));
                     
-                    tc.sendMessage(MarkdownSanitizer.escape(
+                    channel.sendMessage(
                             bot.getMsg(guild.getId(), "request.timed_out", author.getAsMention(), target.getEffectiveName())
-                    )).queue();
+                    ).queue();
                 }
         );
     }
     
-    private void sendResponse(Message msg, TextChannel tc, HttpUtil.Result result, Member author, String targets, String text){
+    private void sendResponse(Message msg, TextChannel tc, HttpUtil.Result result, Member author, List<String> targets, String text){
         String id = tc.getGuild().getId();
         
         if(result.getUrl().equalsIgnoreCase("https://purrbot.site/img/sfw/neko/img/neko_136.jpg")){
@@ -190,7 +213,7 @@ public class RequestUtil{
                 text = bot.getMsg(id, "purr.fun.neko.snuggle");
             }
         }
-    
+        
         EmbedBuilder embed;
         if(result.isRequired() && author != null){
             embed = bot.getEmbedUtil().getEmbed(author);
@@ -199,35 +222,37 @@ public class RequestUtil{
         }
     
         embed.setDescription(text)
-                .setImage(result.getUrl());
+             .setImage(result.getUrl());
         
         msg.editMessage(EmbedBuilder.ZERO_WIDTH_SPACE)
-                .embed(embed.build())
-                .queue(message -> {
-                    if(message.getGuild().getSelfMember().hasPermission(tc, Permission.MESSAGE_MANAGE))
-                        message.clearReactions().queue(
-                                null,
-                                e -> logger.warn("Unable to clear reactions from Message! Was the message deleted?")
-                        );
-                    
-                    if(result.isRequest() && author != null)
-                        sendConfirmEmbed(tc, author, targets, message.getJumpUrl());
-                }, e -> tc.sendMessage(embed.build()).queue(message -> {
-                    if(result.isRequest() && author != null)
-                        sendConfirmEmbed(tc, author, targets, message.getJumpUrl());
-                }));
+           .setComponents(Collections.emptyList())
+           .setEmbeds(embed.build())
+           .queue(message -> {
+               if(message.getGuild().getSelfMember().hasPermission(tc, Permission.MESSAGE_MANAGE))
+                   message.clearReactions().queue(
+                           null,
+                           e -> logger.warn("Unable to clear reactions from Message! Was the message deleted?")
+                   );
+               
+               if(result.isRequest() && author != null)
+                   sendConfirmation(tc, author, targets, message);
+           }, e -> {
+               logger.warn("Unable to edit original message for {}. Sending fallback. Cause: {}", result.getPath(), e.getMessage());
+               tc.sendMessageEmbeds(embed.build()).queue(message -> {
+                   if(result.isRequest() && author != null)
+                       sendConfirmation(tc, author, targets, message);
+               });
+           });
     }
     
-    private void sendConfirmEmbed(TextChannel tc, Member author, String targets, String messageUrl){
-        MessageEmbed embed = bot.getEmbedUtil().getEmbed()
-                .setDescription(
-                        bot.getMsg(tc.getGuild().getId(), "request.accepted", author.getEffectiveName(), targets)
-                                .replace("{link}", messageUrl)
-                )
-                .build();
-        
-        tc.sendMessage(author.getAsMention()).embed(embed).queue(
-                del -> del.delete().queueAfter(10, TimeUnit.SECONDS)
-        );
+    private void sendConfirmation(TextChannel tc, Member author, List<String> targets, Message msg){
+        msg.reply(
+                bot.getMsg(tc.getGuild().getId(), "request.accepted", author.getAsMention(), targets)
+        ).queue();
+    }
+    
+    private boolean isValidButton(String buttonId, String apiName){ 
+        return buttonId.equals(String.format("purr:%s:accept", apiName)) ||
+               buttonId.equals(String.format("purr:%s:deny", apiName));
     }
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -22,20 +22,26 @@ import com.github.rainestormee.jdacommand.CommandAttribute;
 import com.github.rainestormee.jdacommand.CommandDescription;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 
-import java.io.IOException;
+import java.util.EnumSet;
+import java.util.List;
 
 @CommandDescription(
         name = "Quote",
         description = "purr.info.quote.description",
         triggers = {"quote"},
         attributes = {
-                @CommandAttribute(key = "category", value = "info"),
-                @CommandAttribute(key = "usage", value = "{p}quote <messageId> [#channel]"),
-                @CommandAttribute(key = "help", value = "{p}quote <messageId> [#channel]")
+            @CommandAttribute(key = "category", value = "info"),
+            @CommandAttribute(key = "usage", value = "{p}quote <messageId> [#channel]"),
+            @CommandAttribute(key = "help", value = "{p}quote <messageId> [#channel]")
         }
 )
 public class CmdQuote implements Command{
@@ -47,170 +53,92 @@ public class CmdQuote implements Command{
     }
 
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
         if(args.length == 0){
             bot.getEmbedUtil().sendError(tc, member, "purr.info.quote.few_args");
             return;
         }
-
-        if(msg.getMentionedChannels().isEmpty()){
-            if(!guild.getSelfMember().hasPermission(tc, Permission.MESSAGE_HISTORY)){
-                bot.getEmbedUtil().sendPermError(tc, member, Permission.MESSAGE_HISTORY, true);
-                return;
-            }
-
-            Message quote = getMessage(args[0], tc);
-
-            if(quote == null){
-                MessageEmbed embed = bot.getEmbedUtil().getEmbed(member)
-                        .setColor(0xFF0000)
-                        .setDescription(
-                                bot.getMsg(guild.getId(), "purr.info.quote.no_msg")
-                                        .replace("{channel}", tc.getAsMention())
-                        )
-                        .build();
-                
-                tc.sendMessage(embed).queue();
-                return;
-            }
-            if(!quote.getAttachments().isEmpty()){
-                String link = quote.getAttachments().stream().filter(Message.Attachment::isImage).findFirst()
-                        .map(Message.Attachment::getUrl).orElse(null);
-
-                if(link == null && quote.getContentRaw().isEmpty()){
+        
+        TextChannel targetChannel = msg.getMentions().getChannels(TextChannel.class).isEmpty() ? tc : msg.getMentions().getChannels(TextChannel.class).get(0);
+        
+        if(targetChannel.isNSFW() && !tc.isNSFW()){
+            MessageEmbed embed = bot.getEmbedUtil().getEmbed(member)
+                .setColor(0xFF0000)
+                .setDescription(
+                    bot.getMsg(guild.getId(), "purr.info.quote.nsfw_channel")
+                        .replace("{channel}", targetChannel.getAsMention())
+                ).build();
+            
+            tc.sendMessageEmbeds(embed).queue();
+            return;
+        }
+        
+        if(!guild.getSelfMember().hasPermission(targetChannel, Permission.VIEW_CHANNEL, Permission.MESSAGE_HISTORY)){
+            bot.getEmbedUtil().sendPermError(tc, member, targetChannel, Permission.MESSAGE_HISTORY, true);
+            return;
+        }
+        
+        targetChannel.retrieveMessageById(args[0]).queue(
+            message -> {
+                if(message.getAttachments().isEmpty() && message.getContentRaw().isEmpty()){
                     bot.getEmbedUtil().sendError(tc, member, "purr.info.quote.no_value");
                     return;
                 }
-
-                sendQuoteEmbed(quote, link, tc);
-            }else{
-                byte[] bytes;
-
-                try{
-                    bytes = bot.getImageUtil().getQuoteImg(quote);
-                }catch(IOException ex){
-                    bytes = null;
+                
+                String memberName = getMemberName(guild.getId(), message.getMember());
+                EmbedBuilder quote = bot.getEmbedUtil().getEmbed()
+                    .setAuthor(
+                        bot.getMsg(guild.getId(), "purr.info.quote.embed_basic.info", memberName, false),
+                        null,
+                        message.getAuthor().getEffectiveAvatarUrl()
+                    )
+                    .setDescription(message.getContentRaw())
+                    .setFooter(
+                        bot.getMsg(guild.getId(), "purr.info.quote.embed_basic.channel").replace("{channel}", targetChannel.getName())
+                    )
+                    .setTimestamp(message.getTimeCreated());
+                
+                if(!message.getAttachments().isEmpty()){
+                    for(Message.Attachment attachment : message.getAttachments()){
+                        if(!attachment.isImage())
+                            continue;
+                        
+                        quote.setImage(attachment.getUrl());
+                        break;
+                    }
                 }
-
-                if(bytes == null){
-                    sendQuoteEmbed(quote, null, tc);
-                    return;
-                }
-
-                sendImgEmbed(member, quote, bytes, tc);
-            }
-            return;
-        }
-
-        TextChannel channel = msg.getMentionedChannels().get(0);
-        if(channel.isNSFW() && !tc.isNSFW()){
-            MessageEmbed embed = bot.getEmbedUtil().getEmbed(member)
+                
+                tc.sendMessageEmbeds(quote.build())
+                  .setActionRow(Button.link(message.getJumpUrl(), bot.getMsg(guild.getId(), "purr.info.quote.button")))
+                  .queue();
+            },
+            e -> {
+                MessageEmbed embed = bot.getEmbedUtil().getEmbed(member)
                     .setColor(0xFF0000)
                     .setDescription(
-                            bot.getMsg(guild.getId(), "purr.info.quote.nsfw_channel")
-                                    .replace("{channel}", channel.getAsMention())
-                    )
-                    .build();
-            
-            tc.sendMessage(embed).queue();
-            return;
-        }
-
-        if(guild.getSelfMember().hasPermission(channel, Permission.MESSAGE_READ, Permission.MESSAGE_HISTORY)){
-            Message quote = getMessage(args[0], channel);
-
-            if(quote == null){
-                bot.getEmbedUtil().sendError(tc, member, "purr.info.quote.invalid_id");
-                return;
+                        bot.getMsg(guild.getId(), "purr.info.quote.no_msg")
+                            .replace("{channel}", targetChannel.getAsMention())
+                    ).build();
+                
+                tc.sendMessageEmbeds(embed).queue();
             }
-
-            if(!quote.getAttachments().isEmpty()){
-                String link = quote.getAttachments().stream().filter(Message.Attachment::isImage).findFirst()
-                        .map(Message.Attachment::getUrl).orElse(null);
-
-                if(link == null && quote.getContentRaw().isEmpty()){
-                    bot.getEmbedUtil().sendError(tc, member, "purr.info.quote.no_value");
-                    return;
-                }
-
-                sendQuoteEmbed(quote, link, tc);
-            }else{
-                byte[] bytes;
-
-                try{
-                    bytes = bot.getImageUtil().getQuoteImg(quote);
-                }catch(IOException ex){
-                    bytes = null;
-                }
-
-                if(bytes == null){
-                    sendQuoteEmbed(quote, null, tc);
-                    return;
-                }
-                sendImgEmbed(member, quote, bytes, tc);
-            }
-        }else{
-            bot.getEmbedUtil().sendPermError(tc, member, channel, Permission.MESSAGE_HISTORY, true);
-        }
+        );
     }
     
-    private Message getMessage(String id, TextChannel channel){
-        Message message;
-        try{
-            message = channel.retrieveMessageById(id).complete();
-        }catch(Exception ex){
-            message = null;
-        }
-        
-        return message;
+    @Override
+    public EnumSet<Permission> getPermissions(){
+        return EnumSet.of(
+            Permission.MESSAGE_EMBED_LINKS,
+            Permission.MESSAGE_ADD_REACTION,
+            Permission.MESSAGE_EXT_EMOJI,
+            Permission.MESSAGE_HISTORY
+        );
     }
     
-    private String getMember(Guild guild, Member member){
+    private String getMemberName(String guildId, Member member){
         if(member == null)
-            return bot.getMsg(guild.getId(), "misc.unknown_user");
+            return bot.getMsg(guildId, "misc.unknown_user");
         
         return member.getEffectiveName();
-    }
-    
-    private void sendQuoteEmbed(Message msg, String link, TextChannel channel) {
-        Guild guild = msg.getGuild();
-        String name = getMember(guild, msg.getMember());
-        
-        EmbedBuilder quoteEmbed = bot.getEmbedUtil().getEmbed()
-                .setAuthor(
-                        bot.getMsg(guild.getId(), "purr.info.quote.embed_basic.info", name),
-                        msg.getJumpUrl(),
-                        msg.getAuthor().getEffectiveAvatarUrl()
-                )
-                .setDescription(msg.getContentRaw())
-                .setImage(link)
-                .setFooter(
-                        bot.getMsg(guild.getId(), "purr.info.quote.embed_basic.channel")
-                                .replace("{channel}", msg.getTextChannel().getName()),
-                        null
-                )
-                .setTimestamp(msg.getTimeCreated());
-        
-        channel.sendMessage(quoteEmbed.build()).queue();
-    }
-    
-    private void sendImgEmbed(Member member, Message quote, byte[] bytes, TextChannel textChannel){
-        Guild guild = member.getGuild();
-        String filename = String.format("quote_%s.png", quote.getId());
-        String name = getMember(guild, quote.getMember());
-        
-        MessageEmbed embed = bot.getEmbedUtil().getEmbed(member)
-                .setDescription(
-                        bot.getMsg(guild.getId(), "purr.info.quote.embed_image.info", name)
-                                .replace("{channel}", quote.getTextChannel().getAsMention())
-                                .replace("{link}", quote.getJumpUrl())
-                )
-                .setImage(String.format(
-                        "attachment://%s",
-                        filename
-                ))
-                .build();
-        
-        textChannel.sendMessage(embed).addFile(bytes, filename).queue();
     }
 }

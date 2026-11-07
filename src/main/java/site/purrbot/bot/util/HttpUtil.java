@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -18,20 +18,18 @@
 
 package site.purrbot.bot.util;
 
-import ch.qos.logback.classic.Logger;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import okhttp3.*;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import site.purrbot.bot.constants.IDs;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 public class HttpUtil {
     
-    private final Logger logger = (Logger)LoggerFactory.getLogger(HttpUtil.class);
+    private final Logger logger = LoggerFactory.getLogger(HttpUtil.class);
     private final OkHttpClient client = new OkHttpClient();
     
     private String image(String url) throws IOException{
@@ -103,10 +101,106 @@ public class HttpUtil {
         });
     }
     
+    public CompletableFuture<BotListResult> postServerStats(String name, String discrim, long guilds, long shards, BotList botList, String token){
+        return CompletableFuture.supplyAsync(() -> performPost(name, discrim, guilds, shards, botList, token));
+    }
+    
+    private BotListResult performPost(String name, String discrim, long guilds, long shards, BotList botList, String token){
+        JSONObject json = new JSONObject()
+            .put(botList.getGuildCount(), guilds);
+        
+        if(botList.getShardCount() != null)
+            json.put(botList.getShardCount(), shards);
+        
+        RequestBody requestBody = RequestBody.create(json.toString(), null);
+        Request request = new Request.Builder()
+            .url(botList.getUrl().replace("{id}", IDs.PURR))
+            .addHeader("Authorization", token)
+            .addHeader("Content-Type", "application/json")
+            .addHeader("User-Agent", String.format(
+                "%s-%s/%s (JDA) DBots/%s",
+                name,
+                discrim,
+                "BOT_VERSION",
+                IDs.PURR
+            ))
+            .post(requestBody)
+            .build();
+        
+        try(Response response = client.newCall(request).execute()){
+            return new BotListResult(botList.getName(), response.isSuccessful(), response.code(), response.message());
+        }catch(IOException ex){
+            ex.printStackTrace();
+            return null;
+        }
+    }
+    
+    public static class BotListResult{
+        private final String botList;
+        private final boolean success;
+        private final int responseCode;
+        private final String responseMessage;
+        
+        public BotListResult(String botList, boolean success, int responseCode, String responseMessage){
+            this.botList = botList;
+            this.success = success;
+            this.responseCode = responseCode;
+            this.responseMessage = responseMessage;
+        }
+        
+        public String getBotList(){
+            return botList;
+        }
+        
+        public boolean isSuccess(){
+            return success;
+        }
+        
+        public int getResponseCode(){
+            return responseCode;
+        }
+        
+        public String getResponseMessage(){
+            return responseMessage;
+        }
+    }
+    
+    public static class Result{
+        private final String url;
+        private final String path;
+        private final boolean request;
+        private final boolean required;
+        
+        public Result(String url, String path, boolean request, boolean required){
+            this.url = url;
+            this.path = path;
+            this.request = request;
+            this.required = required;
+        }
+        
+        public String getUrl(){
+            return url;
+        }
+        
+        public String getPath(){
+            return path;
+        }
+        
+        public boolean isRequest(){
+            return request;
+        }
+        
+        public boolean isRequired(){
+            return required;
+        }
+    }
+    
     public enum ImageAPI{
         // SFW Gifs
+        ANGRY    ("angry",   "angry",  true, false, false, false),
         BITE     ("bite",    "bite",   true, false, false, false),
         BLUSH    ("blush",   "blush",  true, false, false, false),
+        COMFY    ("comfy",   "comfy",  true, false, false, false),
         CRY      ("cry",     "cry",    true, false, false, false),
         CUDDLE   ("cuddle",  "cuddle", true, false, false, false),
         DANCE    ("dance",   "dance",  true, false, false, false),
@@ -115,10 +209,12 @@ public class HttpUtil {
         FLUFF    ("fluff",   "fluff",  true, false, true,  false),
         HUG      ("hug",     "hug",    true, false, false, false),
         KISS     ("kiss",    "kiss",   true, false, false, false),
+        LAY      ("lay",     "lay",    true, false, false, false),
         LICK     ("lick",    "lick",   true, false, false, false),
         NEKO_GIF ("neko",    "neko",   true, false, false, true),
         PAT      ("pat",     "pat",    true, false, false, false),
         POKE     ("poke",    "poke",   true, false, false, false),
+        POUT     ("pout",    "pout",   true, false, false, false),
         SLAP     ("slap",    "slap",   true, false, false, false),
         SMILE    ("smile",   "smile",  true, false, false, false),
         TAIL     ("tail",    "tail",   true, false, false, false),
@@ -129,9 +225,11 @@ public class HttpUtil {
         NSFW_BLOWJOB      ("blowjob",       "blowjob",   true, true, true,  false),
         NSFW_CUM          ("cum",           "cum",       true, true, false, false),
         NSFW_FUCK         ("fuck",          "fuck",      true, true, true,  false),
-        NSFW_NEKO_GIF     ("neko",          "lewd",      true, true, false, true),
+        NSFW_NEKO_GIF     ("neko",          "neko",      true, true, false, true),
         NSFW_PUSSYLICK    ("pussylick",     "pussylick", true, true, true,  false),
         NSFW_SOLO         ("solo",          "solo",      true, true, false, false),
+        NSFW_SOLO_MALE    ("solo_male",     "solo",      true, true, false, false),
+        NSFW_SPANK        ("spank",         "spank",     true, true, true,  false),
         NSFW_THREESOME_FFF("threesome_fff", "threesome", true, true, true,  false),
         NSFW_THREESOME_FFM("threesome_ffm", "threesome", true, true, true,  false),
         NSFW_THREESOME_MMF("threesome_mmf", "threesome", true, true, true,  false),
@@ -145,9 +243,10 @@ public class HttpUtil {
         NEKO_IMG ("neko",    "neko",    false, false, false, true),
         OKAMI    ("okami",   "okami",   false, false, false, true),
         SENKO    ("senko",   "senko",   false, false, false, true),
+        SHIRO    ("shiro",   "shiro"  , false, false, false, true),
         
         // NSFW Images
-        NSFW_NEKO_IMG("neko", "lewd", false, true, false, true);
+        NSFW_NEKO_IMG("neko", "neko", false, true, false, true);
         
         private final String name;
         private final String pathName;
@@ -195,33 +294,69 @@ public class HttpUtil {
         }
     }
     
-    public static class Result{
-        private final String url;
-        private final String path;
-        private final boolean request;
-        private final boolean required;
+    public enum BotList{
+        DISCORD_BOTS_GG(
+            "tokens.discord-bots-gg",
+            "discord.bots.gg",
+            "https://discord.bots.gg/api/v1/bots/{id}/stats",
+            "guildCount",
+            "shardCount"
+        ),
+        DISCORDEXTREMELIST_XYZ(
+            "tokens.discordextremelist-xyz",
+            "discordextremelist.xyz",
+            "https://api.discordextremelist.xyz/v2/bot/{id}/stats",
+            "guildCount",
+            "shardCount"
+        ),
+        DISCORDSERVICES_NET(
+            "tokens.discordservices-net",
+            "discordservices.net",
+            "https://api.discordservices.net/bot/{id}/stats",
+            "servers",
+            "shards"
+        );
         
-        public Result(String url, String path, boolean request, boolean required){
+        private final String tokenPath;
+        private final String name;
+        private final String url;
+        private final String guildCount;
+        private final String shardCount;
+        
+        BotList(String tokenPath, String name, String url, String guildCount){
+            this.tokenPath = tokenPath;
+            this.name = name;
             this.url = url;
-            this.path = path;
-            this.request = request;
-            this.required = required;
+            this.guildCount = guildCount;
+            this.shardCount = null;
+        }
+    
+        BotList(String tokenPath, String name, String url, String guildCount, String shardCount){
+            this.tokenPath = tokenPath;
+            this.name = name;
+            this.url = url;
+            this.guildCount = guildCount;
+            this.shardCount = shardCount;
+        }
+    
+        public String getTokenPath(){
+            return tokenPath;
+        }
+    
+        public String getName(){
+            return name;
         }
     
         public String getUrl(){
             return url;
         }
-    
-        public String getPath(){
-            return path;
+        
+        public String getGuildCount(){
+            return guildCount;
         }
-    
-        public boolean isRequest(){
-            return request;
-        }
-    
-        public boolean isRequired(){
-            return required;
+        
+        public String getShardCount(){
+            return shardCount;
         }
     }
 }

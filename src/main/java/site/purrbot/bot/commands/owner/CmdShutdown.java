@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -18,36 +18,42 @@
 
 package site.purrbot.bot.commands.owner;
 
-import ch.qos.logback.classic.Logger;
 import com.github.rainestormee.jdacommand.CommandAttribute;
 import com.github.rainestormee.jdacommand.CommandDescription;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
+
+import java.util.List;
 
 @CommandDescription(
         name = "Shutdown",
         description = "Disables the bot",
         triggers = {"shutdown", "sleep"},
         attributes = {
-                @CommandAttribute(key = "category", value = "owner"),
-                @CommandAttribute(key = "usage", value = "{p}shutdown"),
-                @CommandAttribute(key = "help", value = "{p}shutdown")
+            @CommandAttribute(key = "category", value = "owner"),
+            @CommandAttribute(key = "usage", value = "{p}shutdown"),
+            @CommandAttribute(key = "help", value = "{p}shutdown")
         }
 )
 public class CmdShutdown implements Command{
 
     private final PurrBot bot;
-    private final Logger logger = (Logger)LoggerFactory.getLogger(CmdShutdown.class);
+    private final Logger logger = LoggerFactory.getLogger(CmdShutdown.class);
 
     public CmdShutdown(PurrBot bot){
         this.bot = bot;
     }
 
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
         if(msg.getGuild().getSelfMember().hasPermission(tc, Permission.MESSAGE_MANAGE))
             msg.delete().queue();
 
@@ -56,7 +62,7 @@ public class CmdShutdown implements Command{
                 .setImage(bot.getMessageUtil().getRandomShutdownImg())
                 .build();
 
-        tc.sendMessage(embed).queue(message -> {
+        tc.sendMessageEmbeds(embed).queue(message -> {
             logger.info("Disabling bot! Good bye...");
             bot.disable();
         });

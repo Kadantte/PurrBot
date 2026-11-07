@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -18,13 +18,14 @@
 
 package site.purrbot.bot.commands.fun;
 
-import ch.qos.logback.classic.Logger;
 import com.github.rainestormee.jdacommand.CommandAttribute;
 import com.github.rainestormee.jdacommand.CommandDescription;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
@@ -38,24 +39,22 @@ import java.util.stream.Collectors;
         description = "purr.fun.pat.description",
         triggers = {"pat", "patting", "pet", "patto"},
         attributes = {
-                @CommandAttribute(key = "category", value = "fun"),
-                @CommandAttribute(key = "usage", value = "{p}pat <@user> [@user ...]"),
-                @CommandAttribute(key = "help", value = "{p}pat <@user> [@user ...]")
+            @CommandAttribute(key = "category", value = "fun"),
+            @CommandAttribute(key = "usage", value = "{p}pat <@user> [@user ...]"),
+            @CommandAttribute(key = "help", value = "{p}pat <@user> [@user ...]")
         }
 )
 public class CmdPat implements Command{
 
     private final PurrBot bot;
-    private final Logger logger = (Logger)LoggerFactory.getLogger("Command - Pat");
+    private final Logger logger = LoggerFactory.getLogger("Command - Pat");
 
     public CmdPat(PurrBot bot){
         this.bot = bot;
     }
 
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args) {
-        List<Member> members = msg.getMentionedMembers();
-    
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args) {
         if(members.isEmpty()){
             bot.getEmbedUtil().sendError(tc, member, "purr.fun.pat.no_mention");
             return;
@@ -71,7 +70,7 @@ public class CmdPat implements Command{
                         bot.getRandomMsg(guild.getId(), "purr.fun.pat.mention_purr", member.getAsMention())
                 ).queue();
             }
-            msg.addReaction("\u2764").queue(
+            msg.addReaction(Emoji.fromUnicode("\u2764")).queue(
                     null,
                     e -> logger.warn("Couldn't add a Reaction to a message.")
             );
@@ -83,11 +82,11 @@ public class CmdPat implements Command{
             ).queue();
         }
 
-        String targets = members.stream()
+        List<String> targets = members.stream()
                 .filter(mem -> !mem.equals(guild.getSelfMember()))
                 .filter(mem -> !mem.equals(member))
                 .map(Member::getEffectiveName)
-                .collect(Collectors.joining(", "));
+                .collect(Collectors.toList());
 
         if(targets.isEmpty())
             return;

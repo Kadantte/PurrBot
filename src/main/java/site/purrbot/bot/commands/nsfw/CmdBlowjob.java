@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -23,19 +23,21 @@ import com.github.rainestormee.jdacommand.CommandDescription;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 import site.purrbot.bot.util.HttpUtil;
+
+import java.util.List;
 
 @CommandDescription(
         name = "Blowjob",
         description = "purr.nsfw.blowjob.description",
         triggers = {"blowjob", "bj", "bjob", "succ"},
         attributes = {
-                @CommandAttribute(key = "category", value = "nsfw"),
-                @CommandAttribute(key = "usage", value = "{p}blowjob <@user>"),
-                @CommandAttribute(key = "help", value = "{p}blowjob <@user>")
+            @CommandAttribute(key = "category", value = "nsfw"),
+            @CommandAttribute(key = "usage", value = "{p}blowjob <@user>"),
+            @CommandAttribute(key = "help", value = "{p}blowjob <@user>")
         }
 )
 public class CmdBlowjob implements Command{
@@ -47,13 +49,13 @@ public class CmdBlowjob implements Command{
     }
     
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
-        if(msg.getMentionedMembers().isEmpty()){
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
+        if(members.isEmpty()){
             bot.getEmbedUtil().sendError(tc, member, "purr.nsfw.blowjob.no_mention");
             return;
         }
 
-        Member target = msg.getMentionedMembers().get(0);
+        Member target = members.get(0);
 
         if(target.equals(guild.getSelfMember())){
             if(bot.isBeta()){
@@ -98,6 +100,6 @@ public class CmdBlowjob implements Command{
             return;
         }
         
-        bot.getRequestUtil().handleReactionEvent(tc, member, target, HttpUtil.ImageAPI.NSFW_BLOWJOB);
+        bot.getRequestUtil().handleButtonEvent(tc, member, target, HttpUtil.ImageAPI.NSFW_BLOWJOB);
     }
 }

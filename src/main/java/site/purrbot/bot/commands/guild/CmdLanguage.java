@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -20,7 +20,11 @@ package site.purrbot.bot.commands.guild;
 
 import com.github.rainestormee.jdacommand.CommandAttribute;
 import com.github.rainestormee.jdacommand.CommandDescription;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 import site.purrbot.bot.constants.Links;
@@ -34,14 +38,14 @@ import java.util.List;
         description = "purr.guild.language.description",
         triggers = {"language", "lang"},
         attributes = {
-                @CommandAttribute(key = "manage_server"),
-                @CommandAttribute(key = "category", value = "guild"),
-                @CommandAttribute(key = "usage", value =
-                        "{p}language\n" +
-                        "{p}language set <language>\n" +
-                        "{p}language reset"
-                ),
-                @CommandAttribute(key = "help", value = "{p}language [set <language>|reset]")
+            @CommandAttribute(key = "manage_server"),
+            @CommandAttribute(key = "category", value = "guild"),
+            @CommandAttribute(key = "usage", value =
+                "{p}language\n" +
+                "{p}language set <language>\n" + 
+                "{p}language reset"
+            ),
+            @CommandAttribute(key = "help", value = "{p}language [set <language>|reset]")
         }
 )
 public class CmdLanguage implements Command{
@@ -52,7 +56,7 @@ public class CmdLanguage implements Command{
     }
     
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
         if(args.length < 1){
             MessageEmbed embed = bot.getEmbedUtil().getEmbed(member)
                     .setDescription(
@@ -73,7 +77,7 @@ public class CmdLanguage implements Command{
                     )
                     .build();
             
-            tc.sendMessage(embed).queue();
+            tc.sendMessageEmbeds(embed).queue();
         }else{
             if(args[0].equalsIgnoreCase("reset")){
                 bot.setLanguage(guild.getId(), "en");
@@ -83,7 +87,7 @@ public class CmdLanguage implements Command{
                         .setDescription("Language reset back to `English (en)`!")
                         .build();
                 
-                tc.sendMessage(embed).queue();
+                tc.sendMessageEmbeds(embed).queue();
             }else
             if(args[0].equalsIgnoreCase("set")){
                 if(args.length < 2){
@@ -105,7 +109,7 @@ public class CmdLanguage implements Command{
                         )
                         .build();
                 
-                tc.sendMessage(embed).queue();
+                tc.sendMessageEmbeds(embed).queue();
             }else{
                 bot.getEmbedUtil().sendError(tc, member, "purr.guild.language.invalid_args");
             }

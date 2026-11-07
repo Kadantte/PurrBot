@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -25,21 +25,23 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 import site.purrbot.bot.constants.IDs;
 import site.purrbot.bot.constants.Links;
 
+import java.util.List;
+
 @CommandDescription(
         name = "Invite",
         description = "purr.info.invite.description",
         triggers = {"invite", "links"},
         attributes = {
-                @CommandAttribute(key = "category", value = "info"),
-                @CommandAttribute(key = "usage", value = "{p}invite [--dm]"),
-                @CommandAttribute(key = "help", value = "{p}invite [--dm]")
+            @CommandAttribute(key = "category", value = "info"),
+            @CommandAttribute(key = "usage", value = "{p}invite [--dm]"),
+            @CommandAttribute(key = "help", value = "{p}invite [--dm]")
         }
 )
 public class CmdInvite implements Command{
@@ -51,7 +53,7 @@ public class CmdInvite implements Command{
     }
     
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
         if(bot.isBeta()){
             bot.getEmbedUtil().sendError(tc, member, "snuggle.info.invite.message");
             return;
@@ -86,7 +88,7 @@ public class CmdInvite implements Command{
                                 ),
                                 getInvite(
                                         guild,
-                                        Permission.MESSAGE_WRITE,
+                                        Permission.MESSAGE_SEND,
                                         Permission.MESSAGE_EMBED_LINKS,
                                         Permission.MESSAGE_HISTORY,
                                         Permission.MESSAGE_ADD_REACTION,
@@ -100,7 +102,7 @@ public class CmdInvite implements Command{
         
         if(bot.getMessageUtil().hasArg("dm", args)){
             member.getUser().openPrivateChannel()
-                    .flatMap((channel) -> channel.sendMessage(invite.build()))
+                    .flatMap((channel) -> channel.sendMessageEmbeds(invite.build()))
                     .queue(
                             message -> tc.sendMessage(
                                     bot.getMsg(guild.getId(), "purr.info.invite.dm_success", member.getAsMention())
@@ -112,13 +114,13 @@ public class CmdInvite implements Command{
             return;
         }
 
-        tc.sendMessage(invite.build()).queue();
+        tc.sendMessageEmbeds(invite.build()).queue();
     }
     
     private String getInvite(Guild guild, Permission... permissions){
-        String invite = "https://add.botl.ink?id=" + IDs.PURR + "&perms=" + Permission.getRaw(permissions);
+        String link = guild.getJDA().setRequiredScopes("applications.commands").getInviteUrl(permissions);
         
-        return getLink(guild.getId(), "invite", invite);
+        return getLink(guild.getId(), "invite", link);
     }
     
     private String getLink(String id, String path, String link){

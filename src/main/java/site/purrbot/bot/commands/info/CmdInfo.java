@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -22,21 +22,27 @@ import com.github.rainestormee.jdacommand.CommandAttribute;
 import com.github.rainestormee.jdacommand.CommandDescription;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDAInfo;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 import site.purrbot.bot.constants.IDs;
 import site.purrbot.bot.constants.Links;
 
+import java.util.List;
+
 @CommandDescription(
         name = "Info",
         description = "purr.info.info.description",
         triggers = {"info", "infos", "information"},
         attributes = {
-                @CommandAttribute(key = "category", value = "info"),
-                @CommandAttribute(key = "usage", value = "{p}info [--dm]"),
-                @CommandAttribute(key = "help", value = "{p}info [--dm]")
+            @CommandAttribute(key = "category", value = "info"),
+            @CommandAttribute(key = "usage", value = "{p}info [--dm]"),
+            @CommandAttribute(key = "help", value = "{p}info [--dm]")
         }
 )
 public class CmdInfo implements Command{
@@ -48,13 +54,13 @@ public class CmdInfo implements Command{
     }
     
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
         MessageEmbed embed = getEmbed(member);
         if(bot.getMessageUtil().hasArg("dm", args)){
             String mention = member.getAsMention();
             String prefix = bot.isBeta() ? "snuggle" : "purr";
             member.getUser().openPrivateChannel()
-                    .flatMap(channel -> channel.sendMessage(embed))
+                    .flatMap(channel -> channel.sendMessageEmbeds(embed))
                     .queue(
                             message -> tc.sendMessage(
                                     bot.getMsg(guild.getId(), prefix + ".info.info.dm_success", mention)
@@ -66,7 +72,7 @@ public class CmdInfo implements Command{
             return;
         }
 
-        tc.sendMessage(embed).queue();
+        tc.sendMessageEmbeds(embed).queue();
     }
     
     private MessageEmbed getEmbed(Member member){
@@ -117,12 +123,14 @@ public class CmdInfo implements Command{
                 )
                 .addField(
                         bot.getMsg(guild.getId(), "purr.info.info.embed.bot_lists_title"),
-                        "[`Botlist.space`](" +          Links.BOTLIST_SPACE +          ")\n" +
-                        "[`Discord.boats`](" +          Links.DISCORD_BOATS +          ")\n" +
-                        "[`Discordbotlist.com`](" +     Links.DISCORDBOTLIST_COM +     ")\n" +
-                        "[`Discord.bots.gg`](" +        Links.DISCORD_BOTS_GG +        ")\n" +
-                        "[`Discordextremelist.xyz`](" + Links.DISCORDEXTREMELIST_XYZ + ")\n" +
-                        "[`Discordservices.net`](" +    Links.DISCORDSERVICES_NET +    ")",
+                        String.format(
+                                "[`Discord.bots.gg`](%s)\n" +
+                                "[`Discordextremelist.xyz`](%s)\n" +
+                                "[`Discordservices.net`](%s)",
+                                Links.DISCORD_BOTS_GG,
+                                Links.DISCORDEXTREMELIST_XYZ,
+                                Links.DISCORDSERVICES_NET
+                        ),
                         false
                 )
                 .addField(

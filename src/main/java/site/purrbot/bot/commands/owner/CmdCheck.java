@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -24,7 +24,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 import site.purrbot.bot.constants.Emotes;
@@ -39,9 +39,9 @@ import java.util.List;
                 "Checks the Shards and prints their status.",
         triggers = {"check"},
         attributes = {
-                @CommandAttribute(key = "category", value = "owner"),
-                @CommandAttribute(key = "usage", value = "{p}check"),
-                @CommandAttribute(key = "help", value = "{p}check")
+            @CommandAttribute(key = "category", value = "owner"),
+            @CommandAttribute(key = "usage", value = "{p}check"),
+            @CommandAttribute(key = "help", value = "{p}check")
         }
 )
 public class CmdCheck implements Command{
@@ -53,7 +53,7 @@ public class CmdCheck implements Command{
     }
     
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
         tc.sendMessage(String.format(
                 "%s Performing Status checks on Shards. Please wait...",
                 Emotes.TYPING.getEmote()
@@ -70,7 +70,7 @@ public class CmdCheck implements Command{
         for(JDA shard : shards){
             if(builder.length() + getShardStatus(shard).length() > Message.MAX_CONTENT_LENGTH){
                 builder.append("\n```");
-                msg.getTextChannel().sendMessage(builder.toString()).queue();
+                msg.getChannel().asTextChannel().sendMessage(builder.toString()).queue();
                 builder = new StringBuilder("```");
             }
             
@@ -87,7 +87,7 @@ public class CmdCheck implements Command{
             if(!text.endsWith("```"))
                 text += "\n```";
             
-            msg.getTextChannel().sendMessage(text).queue();
+            msg.getChannel().asTextChannel().sendMessage(text).queue();
         }
     }
     

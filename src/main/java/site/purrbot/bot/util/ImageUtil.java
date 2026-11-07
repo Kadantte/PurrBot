@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -19,9 +19,7 @@
 package site.purrbot.bot.util;
 
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.internal.utils.IOUtil;
 import okhttp3.*;
 import org.json.JSONObject;
 import site.purrbot.bot.PurrBot;
@@ -123,47 +121,15 @@ public class ImageUtil {
             return null;
         }
     }
-    
-    public byte[] getQuoteImg(Message quote) throws IOException, NullPointerException{
-        Member member = quote.getMember();
 
-        JSONObject json = new JSONObject()
-                .put("avatar", quote.getAuthor().getEffectiveAvatarUrl())
-                .put("nameColor", member == null ? String.valueOf(0x1FFFFFFF) : String.valueOf(member.getColorRaw()))
-                .put("dateFormat", "dd. MMM yyyy")
-                .put("username", member == null ? "Anonymous" : member.getEffectiveName())
-                .put("message", quote.getContentDisplay())
-                .put("timestamp", quote.getTimeCreated().toInstant().toEpochMilli());
-
-        RequestBody body = RequestBody.create(json.toString(), null);
-        
-        Request request = new Request.Builder()
-                .addHeader("User-Agent", "PurrBot BOT_VERSION")
-                .addHeader("content-type", "application/json")
-                .post(body)
-                .url("https://purrbot.site/api/quote")
-                .build();
-
-        try(Response response = CLIENT.newCall(request).execute()){
-            if(!response.isSuccessful())
-                throw new IOException("Couldn't get quote image.");
-
-            ResponseBody responseBody = response.body();
-            if(responseBody == null)
-                throw new NullPointerException("Received empty response (null).");
-
-            return IOUtil.readFully(responseBody.byteStream());
-        }
-    }
-
-    public InputStream getWelcomeImg(Member member, String icon, String bg, String color) throws IOException, NullPointerException{
+    public InputStream getWelcomeImg(Member member, String icon, String bg, String color){
         Color col = bot.getMessageUtil().getColor(color);
         
         if(col == null)
             color = "#000000";
         else
             color = String.format("%d,%d,%d", col.getRed(), col.getGreen(), col.getBlue());
-
+        
         JSONObject json = new JSONObject()
                 .put("username", member.getUser().getName())
                 .put(
@@ -173,15 +139,11 @@ public class ImageUtil {
                 )
                 .put(
                         "icon",
-                        icon.equalsIgnoreCase("random") ? 
-                                bot.getHttpUtil().getImage("https://purrbot.site/api/img/sfw/icon/img") : 
-                                String.format("https://purrbot.site/img/sfw/icon/img/%s.png", icon)
+                        getUrl("icon", icon, member.getGuild().getOwnerId())
                 )
                 .put(
-                        "banner", 
-                        bg.equalsIgnoreCase("random") ? 
-                                bot.getHttpUtil().getImage("https://purrbot.site/api/img/sfw/background/img") : 
-                                String.format("https://purrbot.site/img/sfw/background/img/%s.png", bg)
+                        "banner",
+                        getUrl("background", bg, member.getGuild().getOwnerId())
                 )
                 .put(
                         "avatar", 
@@ -220,9 +182,55 @@ public class ImageUtil {
 
             ResponseBody responseBody = response.body();
             if(responseBody == null)
-                throw new NullPointerException("Received empty response (null).");
+                return null;
 
             return new ByteArrayInputStream(responseBody.bytes());
+        }catch(IOException ex){
+            return null;
         }
+    }
+    
+    public boolean isValidImage(String url, int width, int height){
+        try{
+            URL finalUrl = new URL(url);
+            URLConnection connection = finalUrl.openConnection();
+            connection.setRequestProperty("User-Agent", "PurrBot BOT_VERSION");
+            connection.connect();
+            
+            BufferedImage image = ImageIO.read(connection.getInputStream());
+            if(image == null)
+                return false;
+            
+            return image.getWidth() == width && image.getHeight() == height;
+        }catch(IOException ex){
+            return false;
+        }
+    }
+    
+    private String getUrl(String type, String name, String ownerId){
+        String baseUrl = "https://purrbot.site/img/sfw/%s/img/%s.png";
+        String defaultUrl = String.format(baseUrl, type, type.equalsIgnoreCase("background") ? "color_white" : "purr");
+        
+        int width = type.equalsIgnoreCase("background") ? 2000 : 320;
+        int height = type.equalsIgnoreCase("background") ? 350 : 320;
+    
+        String url = String.format(baseUrl, type, name);
+        if(name.equalsIgnoreCase("booster")){
+            if(bot.getCheckUtil().isBooster(ownerId))
+                url = String.format("https://purrbot.site/images/boost/booster_%s.png", type);
+            else
+                url = defaultUrl;
+        }else
+        if((name.startsWith("https://") || name.startsWith("http://"))){
+            if(!CheckUtil.notPatreon(bot, null, ownerId) && isValidImage(name, width, height))
+                url = name;
+            else
+                url = defaultUrl;
+        }else
+        if(name.equalsIgnoreCase("random")){
+            url = bot.getHttpUtil().getImage(String.format("https://purrbot.site/api/img/sfw/%s/img", type));
+        }
+        
+        return url;
     }
 }

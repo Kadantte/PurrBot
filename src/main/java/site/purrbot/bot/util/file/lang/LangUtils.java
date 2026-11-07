@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -33,14 +33,18 @@ public final class LangUtils{
         switch(language.toLowerCase()){
             case "de-ch":
             case "en-owo":
-            case "fr-fr":
+            case "es-es":
             case "ko-kr":
             case "pt-br":
             case "ru-ru":
+            case "tr-tr":
                 return bot.getFileManager().getString(language.toLowerCase(), path);
-    
-            case "it-it":
+            
+            case "bg-bg":
+            case "de-de":
             case "et-ee":
+            case "fr-fr":
+            case "it-it":
             default:
                 return bot.getFileManager().getString("en", path);
         }
@@ -50,29 +54,37 @@ public final class LangUtils{
         switch(language.toLowerCase()){
             case "de-ch":
             case "en-owo":
-            case "fr-fr":
+            case "es-es":
             case "ko-kr":
             case "pt-br":
             case "ru-ru":
+            case "tr-tr":
                 return bot.getFileManager().getStringlist(language.toLowerCase(), path);
-    
-            case "it-it":
+            
+            case "bg-bg":
+            case "de-de":
+            case "fr-fr":
             case "et-ee":
+            case "it-it":
             default:
                 return bot.getFileManager().getStringlist("en", path);
         }
     }
     
     public enum Language{
+        //BG_BG ("\uDDE7", "\uDDEC"),
         DE_CH ("\uDDE8", "\uDDED"),
+        //DE_DE ("\uDDE9", "\uDDEA"),
         EN    ("\uDDEC", "\uDDE7"),
         EN_OWO("\uDDEC", "\uDDE7"),
+        ES_ES ("\uDDEA", "\uDDF8"),
         //ET_EE ("\uDDEA", "\uDDEA"),
-        FR_FR ("\uDDEB", "\uDDF7"),
+        //FR_FR ("\uDDEB", "\uDDF7"),
         //IT_IT ("\uDDEE", "\uDDF9"),
         KO_KR ("\uDDF0", "\uDDF7"),
         PT_BR ("\uDDE7", "\uDDF7"),
         RU_RU ("\uDDF7", "\uDDFA"),
+        TR_TR ("\uDDF9", "\uDDF7"),
         
         UNKNOWN("\uDDFA", "\uDDF3");
         
@@ -84,8 +96,7 @@ public final class LangUtils{
         
         public static String getEmote(String lang){
             for(Language language : values()){
-                String name = language.name().toLowerCase().replace("_", "-");
-                if(name.equals(lang))
+                if(lang.equals(language.name().toLowerCase().replace("_", "-")))
                     return language.emote;
             }
             
@@ -94,9 +105,8 @@ public final class LangUtils{
         
         public static String getString(String lang){
             for(Language language : values()){
-                String name = language.name().toLowerCase().replace("_", "-");
-                if(name.equals(lang))
-                    return language.emote + " " + name;
+                if(lang.equals(language.name().toLowerCase().replace("_", "-")))
+                    return language.emote + " " + lang;
             }
             
             return UNKNOWN.emote + " " + UNKNOWN.name().toLowerCase();

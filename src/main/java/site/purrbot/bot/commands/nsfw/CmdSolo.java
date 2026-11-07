@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -23,19 +23,21 @@ import com.github.rainestormee.jdacommand.CommandDescription;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 import site.purrbot.bot.util.HttpUtil;
 
+import java.util.List;
+
 @CommandDescription(
         name = "Solo",
         description = "purr.nsfw.solo.description",
-        triggers = {"solo", "girl"},
+        triggers = {"solo", "masturbation"},
         attributes = {
-                @CommandAttribute(key = "category", value = "nsfw"),
-                @CommandAttribute(key = "usage", value = "{p}solo"),
-                @CommandAttribute(key = "help", value = "{p}solo")
+            @CommandAttribute(key = "category", value = "nsfw"),
+            @CommandAttribute(key = "usage", value = "{p}solo [--male]"),
+            @CommandAttribute(key = "help", value = "{p}solo [--male]")
         }
 )
 public class CmdSolo implements Command{
@@ -47,9 +49,13 @@ public class CmdSolo implements Command{
     }
 
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
-        tc.sendMessage(bot.getMsg(guild.getId(), "purr.nsfw.solo.loading")).queue(message ->
-                bot.getRequestUtil().handleEdit(tc, message, HttpUtil.ImageAPI.NSFW_SOLO, member)
-        );
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
+        tc.sendMessage(bot.getMsg(guild.getId(), "purr.nsfw.solo.loading")).queue(message ->{
+            if(bot.getMessageUtil().hasArg("male", args)){
+                bot.getRequestUtil().handleEdit(tc, message, HttpUtil.ImageAPI.NSFW_SOLO_MALE, member);
+            }else{
+                bot.getRequestUtil().handleEdit(tc, message, HttpUtil.ImageAPI.NSFW_SOLO, member);
+            }
+        });
     }
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -23,19 +23,21 @@ import com.github.rainestormee.jdacommand.CommandDescription;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 import site.purrbot.bot.util.HttpUtil;
+
+import java.util.List;
 
 @CommandDescription(
         name = "Fluff",
         description = "purr.fun.fluff.description",
         triggers = {"fluff", "fluffing"},
         attributes = {
-                @CommandAttribute(key = "category", value = "fun"),
-                @CommandAttribute(key = "usage", value = "{p}fluff <@user>"),
-                @CommandAttribute(key = "help", value = "{p}fluff <@user>")
+            @CommandAttribute(key = "category", value = "fun"),
+            @CommandAttribute(key = "usage", value = "{p}fluff <@user>"),
+            @CommandAttribute(key = "help", value = "{p}fluff <@user>")
         }
 )
 public class CmdFluff implements Command{
@@ -47,13 +49,13 @@ public class CmdFluff implements Command{
     }
     
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
-        if(msg.getMentionedMembers().isEmpty()){
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
+        if(members.isEmpty()){
             bot.getEmbedUtil().sendError(tc, member, "purr.fun.fluff.no_mention");
             return;
         }
         
-        Member target = msg.getMentionedMembers().get(0);
+        Member target = members.get(0);
         
         if(target.equals(guild.getSelfMember())){
             if(bot.isSpecial(member.getId())){
@@ -69,11 +71,11 @@ public class CmdFluff implements Command{
             }else{
                 if(bot.isBeta()){
                     tc.sendMessage(
-                            bot.getMsg(guild.getId(), "snuggle.fun.fluff.special_user", member.getAsMention())
+                            bot.getRandomMsg(guild.getId(), "snuggle.fun.fluff.mention_snuggle", member.getAsMention())
                     ).queue();
                 }else{
                     tc.sendMessage(
-                            bot.getMsg(guild.getId(), "purr.fun.fluff.special_user", member.getAsMention())
+                            bot.getRandomMsg(guild.getId(), "purr.fun.fluff.mention_purr", member.getAsMention())
                     ).queue();
                 }
             }
@@ -94,6 +96,6 @@ public class CmdFluff implements Command{
             return;
         }
     
-        bot.getRequestUtil().handleReactionEvent(tc, member, target, HttpUtil.ImageAPI.FLUFF);
+        bot.getRequestUtil().handleButtonEvent(tc, member, target, HttpUtil.ImageAPI.FLUFF);
     }
 }

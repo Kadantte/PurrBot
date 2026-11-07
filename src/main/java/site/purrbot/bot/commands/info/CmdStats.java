@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -25,13 +25,14 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 
 import java.lang.management.ManagementFactory;
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @CommandDescription(
@@ -39,9 +40,9 @@ import java.util.concurrent.TimeUnit;
         description = "purr.info.stats.description",
         triggers = {"stats", "stat", "statistic", "statistics"},
         attributes = {
-                @CommandAttribute(key = "category", value = "info"),
-                @CommandAttribute(key = "usage", value = "{p}stats"),
-                @CommandAttribute(key = "help", value = "{p}stats")
+            @CommandAttribute(key = "category", value = "info"),
+            @CommandAttribute(key = "usage", value = "{p}stats"),
+            @CommandAttribute(key = "help", value = "{p}stats")
         }
 )
 public class CmdStats implements Command{
@@ -54,7 +55,7 @@ public class CmdStats implements Command{
     
 
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
         JDA jda = msg.getJDA();
         ShardManager shardManager = bot.getShardManager();
         
@@ -89,7 +90,7 @@ public class CmdStats implements Command{
                         false
                 );
 
-        tc.sendMessage(stats.build()).queue();
+        tc.sendMessageEmbeds(stats.build()).queue();
 
     }
     

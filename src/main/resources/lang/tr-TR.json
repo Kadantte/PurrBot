@@ -1,0 +1,845 @@
+{
+  "embed": {
+    "footer": "{user} tarafından istendi"
+  },
+  "errors": {
+    "administrator": "**Yönetici İzni Algılandı**\nBüyük bir güvenlik riski olan `Yönetici` iznine sahibim!\n__Olası kötüye kullanımı önlemek için; bu izne sahip olduğum sürece herhangi bir komutun gerekliliklerini yerine getirmeyeceğim.__\n\nBunu düzeltmek için aşağıdakilerden birini yapabilirsin:\n- Yönetici rolüne sahip olan rolü benden kaldır.\n- Aşağıda listelenen rol(ler) den izni kaldır.\nYönetici yetkisi tespit edilen roller:\n{roles}",
+    "api_error": "API'ye ulaşılamadı! Lütfen daha sonra tekrar deneyiniz.",
+    "fetch": {
+      "booster_role": "Destek sunucusundan Takviyeci rolü alınamıyor. Lütfen daha sonra tekrar deneyin ve bu sorun devam ederse, [Discord sunucumuzda gelerek]({guild_invite}) bildirin.",
+      "guild": "Destek Sunucusu alınamıyor. Lütfen daha sonra tekrar deneyin ve bu sorun devam ederse, [Discord sunucumuza gelerek]({guild_invite}) bildirin.",
+      "member": "[Destek Sunucusu]({guild_invite})'ndan Üye bilgileri alınamıyor. Bunun çalışması için sunucu sahibinin Destek sunucumuzda olması gerekiyor.\nSunucu sahibiyseniz ve sunucumuzda olduğunuz halde bu sorun devam ediyorsa, `#support` kanalından bize bunu bildirin.",
+      "patreon_roles": "Destek sunucusundan Patreon rolleri alınamıyor. Lütfen daha sonra tekrar deneyin ve bu sorun devam ederse, [Discord sunucumuza gelerek]({guild_invite}) bildirin."
+    },
+    "missing_perms": {
+      "self": "{channel} kanalında aşağıdaki izin(ler)e sahip değilim:\n{permissions}",
+      "user": "Bu komutu çalıştırmak için aşağıdaki izinlere sahip değilsiniz:\n{permission}"
+    },
+    "no_help_info": "Bu komutun gösterilecek bir kullanım bilgisi bulunmuyor.",
+    "no_patreon": {
+      "title": "Patreon Özelliği!",
+      "description": "Bu özellik yalnızca [Kademe 2/3 Patreon Destekçileri]({patreon_url}) tarafından sahip olunan Sunucular için kullanılabilir!\n\nBu sunucunun Sahibi olmanız ve bu özelliğin kilidini açmak istemeniz durumunda, aşağıdaki adımları uygulayın:\n1. [~Nya Discord Sunucusu]'na katılın ({guild_invite})\n2. Discord'unuzu Patreon hesabınıza bağlayın.\n3. Patreon'da Kademe 2 veya 3'e abone olun.",
+      "note_title": "Önemli!",
+      "note_description": "Discord Sunucusundan ayrılmanız veya Patreon aboneliğinizi durdurmanız durumunda bu özellik tekrar devre dışı bırakılacaktır."
+    },
+    "nsfw": {
+      "no_channel_random": [
+        "Bu kanalda yaş sınırlaması yok gibi görünüyor, değil mi {user}?",
+        "Lütfen yaş sınırlaması olan bir kanalda yaramazlık yap {user}.",
+        "Hayır hayır hayır! Tatlı ve ateşli bir insan olacaksın ve bu komutu yaş kısıtlaması olan bir kanalda kullanacaksın {user}!",
+        "ChannelNotAgeRestrictedException: Komut, Yaş kısıtlamalı bir kanalın dışında kullanılamaz.",
+        "Bu yaramaz şeyleri yalnızca yaş kısıtlamalı kanallarda görebilirsin {user}.",
+        "Her şeyin bir yeri vardır. Ve bu komut yaş kısıtlamalı bir kanala ait {user}.",
+        "Üzgünüm {user} ama Discord bu komutu sadece yaş kısıtlamalı kanallarda kullanmama izin veriyor..."
+      ]
+    },
+    "request_error": "İstek işlenirken bir hata oluştu. Mesajımın silinmediğinden ve yeterli izinlere sahip olduğumdan emin olun!",
+    "title": "Hata",
+    "unknown": "B-bu biraz utanç verici ancak, bir eylemi gerçekleştirirken hatayla karşılaştım. {EMOTE_BLUSH}\nLütfen bunu [Discord]({guild_invite}) veya [GitHub]({github_url}) üzerinden bildirin!"
+  },
+  "misc": {
+    "and": "ve",
+    "command_help": {
+      "command_usage": "Komut Kullanımı:",
+      "more_info": "Daha Fazla Bilgi",
+      "required_permissions": "Gerekli İzinler:",
+      "title": "Komut Bilgisi: {command}"
+    },
+    "info": "Selam {user}!\nBu sunucudaki önekim `{prefix}`\nTüm komutlarımı görmek için `{prefix}help` komutunu kullan veya bu bağlantıyı ziyaret et:\nhttps://docs.purrbot.site/bot/commands",
+    "language": "Türkçe (tr-tr)",
+    "unknown_user": "Bilinmiyor",
+    "welcome_member": "Sen #{count}. üyesin"
+  },
+  "purr": {
+    "fun": {
+      "angry": {
+        "description": "\\*sinirli neko sesleri*",
+        "loading": "Biri sinirlendiriliyor...",
+        "message": "{user} sinirli"
+      },
+      "bite": {
+        "description": "Bir veya daha fazla kişiyi ısırmanızı sağlar.",
+        "loading": "{EMOTE_LOADING} Biri ısırılacak...",
+        "mention_self": "Kendini ısırırsan bu yamyamlık olmaz mı {user}?",
+        "mention_purr": [
+          "N-n-ne...? Ben lezzetli değilim! >.<",
+          "H-hey! Ben yemek değilim.",
+          "B-beni ısırma."
+        ],
+        "message": "{user} dişleriyle {targets} adlı üyeyi ısırdı",
+        "no_mention": "Lütfen ısırmak için en az bir üye etiketle!",
+        "special_user": "A-ama {user}! B-bu utanç verici."
+      },
+      "blush": {
+        "description": "Seni utandırır. o////o",
+        "loading": "{EMOTE_LOADING} Utandırılıyorsun...",
+        "message": "{user} kızarıyor."
+      },
+      "comfy": {
+        "description": "Rahat hissettiğinizi göstermenizi sağlar. ^w^",
+        "loading": "{EMOTE_LOADING} Rahat bir yer hazırlanıyor...",
+        "message": "{user} rahat hissediyor."
+      },
+      "cry": {
+        "description": "Ağlamanı sağlar. ;-;",
+        "loading": "{EMOTE_LOADING} Gözyaşları toplanıyor...",
+        "message": "{user} ağlıyor"
+      },
+      "cuddle": {
+        "description": "Bir veya birden fazla kişiyi kucaklamanı sağlar.",
+        "loading": "{EMOTE_LOADING} Bir sarılma gifi arıyorum...",
+        "mention_self": "Neden kendini kucaklıyorsun ki {user}?\nİstersen beni kucaklayabilirsin. {EMOTE_BLUSH}",
+        "mention_purr": [
+          "\\*{user} ile kucaklaşmanın tadını çıkarıyor*",
+          "\\*{user} adlı üyeye sıkı sıkı sarılıyor*",
+          "Sarıldığın için teşekkürler {user}. UwU"
+        ],
+        "message": "{user} ile {targets} birbirine sarıldı.",
+        "no_mention": "Lütfen sarılmak için en az bir üye etiketle!"
+      },
+      "dance": {
+        "description": "Dans etmeneni sağlar. ~(^.^)~",
+        "loading": "{EMOTE_LOADING} Dans etmek için müzik aranıyor...",
+        "message": "{user} dans ediyor"
+      },
+      "eevee": {
+        "description": "Sevimli bir Eevee resmi veya gifi gönderir.",
+        "loading": "{EMOTE_LOADING} Sevimli bir Eevee yakalanıyor...",
+        "message": "Eevee"
+      },
+      "feed": {
+        "description": "Birini nefis yiyeceklerle beslemeni sağlar.",
+        "mention_bot": "Botlar yemek yiyemez şapşal! Yalnızca verilerinizi yiyebilirler. O_O",
+        "mention_purr": [
+          "Yemek mi? Benim için mi? Teşekkürler {user}! \\ *yemeğini yiyip kuyruğunu sallıyor*",
+          "Yemek için teşekkürler {user}.",
+          "\\*tadını çıkararak yemeğini yiyor*",
+          "\\*Mutlu yemek yeme sesleri*"
+        ],
+        "mention_self": "Kendini besliyorsun şapşal. Yemeğini başkasıyla paylaşmaya ne dersin? \\*gözlerini açarak {user} adlı üyeye bakıyor*",
+        "message": "{user}, {target} adlı üyeye yiyecek bir şeyler veriyor.",
+        "no_mention": "Lütfen yemek vermek istediğin kişiyi etiketle.",
+        "request": {
+          "denied": "{target} senden yemek istemiyor {user}",
+          "message": "Selam {target}!\n{user}, sana yemen için biraz yemek vermek istiyor. Bunu sen de ister misin?",
+          "open": "{user} zaten birine bu soruyu sordun! Lütfen talebin kabul edilmesini, reddedilmesini veya zaman aşımına uğramasını bekle."
+        }
+      },
+      "fluff": {
+        "description": "Birinin kuyruğunu kabartırsın... eğer kabul ederse,",
+        "mention_bot": "Ne yazık ki botların kuyruğu yok!",
+        "mention_purr": [
+          "Wha-! Bu çok kaba {user}! \\*korumak için kuyruğunu tutar*",
+          "O-olmaz {user}. Yabancıların kuyruğumu kabartmasına izin vermem!"
+        ],
+        "mention_self": "Nawww... Senin kuyruğunu kabartabilecek biri yok mu? Yoksa utangaç mısın?",
+        "message": "{user}, {target} adlı üyenin kuyruğunu kabartıyor.",
+        "no_mention": "Lütfen kuyruğunu kabartmak istediğin kişiyi etiketle.",
+        "request": {
+          "denied": "{target} senden onun kuyruğunu kabartmanı istemiyor {user}",
+          "message": "Selam {target}!\n{user} senin kuyruğunu kabartmak istiyor. Bunu sen de ister misin?",
+          "open": "{user} zaten birine bu soruyu sordun! Lütfen talebin kabul edilmesini, reddedilmesini veya zaman aşımına uğramasını bekle."
+        },
+        "special_user": "A-ama {user}, bunu herkesin içinde yapamayız."
+      },
+      "holo": {
+        "description": "Elma yiyen, alkol içen bilge kurt resmi gönderir.",
+        "loading": "{EMOTE_LOADING} Holo'dan bir resim alınıyor...",
+        "message": "Holo {EMOTE_BLOB_HOLO}"
+      },
+      "hug": {
+        "description": "Başkalarıyla biraz kucaklaş. \\(>w<)/",
+        "loading": "{EMOTE_LOADING} Sarılma gifi aranıyor...",
+        "mention_self": "Neden kendine sarılıyorsun {user}?\nEğer istersen bana sarılabilirsin. {EMOTE_BLUSH}",
+        "mention_purr": [
+          "\\*{user} adlı üyenin sarılmasının tadını çıkarıyor*",
+          "\\*sarılmanın tadını çıkarırken sessizce mırıldanıyor*",
+          "{user} adlı üyeye sarılmayı hep sevmişimdir"
+        ],
+        "message": "{user} sevgi dolu şekilde {targets} adlı üyeye sarıldı",
+        "no_mention": "Lütfen sarılmak için en az bir üye etiketle!"
+      },
+      "kiss": {
+        "description": "Bir veya daha fazla kişiye öpücük ver.",
+        "loading": "{EMOTE_LOADING} Öpücük atılıyor...",
+        "mention_purr": [
+          "T-tamam. Ama sadece yanağımdan! \\*Yanağını gösterir *",
+          "Sadece yanağım, tamam mı?",
+          "B-bu biraz ayıp, ama tamam. \\*yüzü kızarır*"
+        ],
+        "mention_self": "{user} kendini nasıl öpebilirsin ki? Aynayla mı?",
+        "mention_snuggle": "Hayır {user}! Bunu ona kendin sormalısın.",
+        "message": "{user}, {target} adlı üyeyi öpüyor.",
+        "no_mention": "Lütfen öpmek için en az bir üye etiketle!",
+        "special_user": "\\*{user} tarafından gelen öpücüğün tadını çıkarıyor*"
+      },
+      "kitsune": {
+        "description": "Bir Kitsune (tilki kız) resmi gönderir.",
+        "loading": "{EMOTE_LOADING} kitsune gifi yükleniyor...",
+        "message": "Kitsune {EMOTE_SHIRO_TAIL_WAG}"
+      },
+      "lay": {
+        "description": "Uzanmana izin verir.",
+        "loading": "Uzanacak rahat bir yer bulunuyor...",
+        "message": "{user} uzanıyor"
+      },
+      "lick": {
+        "description": "İnsanları yala... SFW yoluyla elbette.",
+        "loading": "{EMOTE_LOADING} Yalama gifi aranıyor...",
+        "mention_self": "{user} kendini nasıl ve *nerede* yaladığını sormayacağım...",
+        "mention_purr": [
+          "\\*geri çekilir* B-ben beni asla yalamana izin vermedim {user}!",
+          "H-hey! Beni yalama! >.<",
+          "Nya! B-bu ayıp!"
+        ],
+        "message": "{user} diliyle {targets} adlı üyeyi yaladı",
+        "no_mention": "Lütfen yalamak için en az bir kullanıcıyı etiketle!",
+        "special_user": "A-ama tatlım... Herkesin içinde olmaz. \\*utanma*"
+      },
+      "neko": {
+        "description": "Sevimli (veya müstehcen) bir Neko resmi veya gif'i alın.",
+        "loading": "{EMOTE_LOADING} Bir neko ayartılıyor...",
+        "message": "Neko {EMOTE_NEKOWO}",
+        "purr": "{EMOTE_PURR} Geçm.. Geçmişte gerçekten böyle mi görünüyordum?",
+        "snuggle": "{EMOTE_PURR} Bu benim küçük kız kardeşim! UwU"
+      },
+      "okami": {
+        "description": "Sevimli görünen bir Okami (Kurt kız) resmi gönderir.",
+        "loading": "{EMOTE_LOADING} Awoo'nun fotoğrafı çekiliyor...",
+        "message": "Okami {EMOTE_AWOO}"
+      },
+      "pat": {
+        "description": "İnsanları okşa!",
+        "loading": "{EMOTE_LOADING} Okşama yükleniyor...",
+        "mention_self": "Uhm... Burada okşayabileceğin bir neko yok mu {user}? \\*kendini işaret ediyor*",
+        "mention_purr": [
+          "\\*miyav™*",
+          "\\*kafasını {user} adlı üyenin eline yaslar*",
+          "Nya... Okşama için teşekkürler."
+        ],
+        "message": "{user} eliyle {targets} adlı üyeyi okşadı",
+        "no_mention": "Lütfen okşamak için en az bir üye etiketle!"
+      },
+      "poke": {
+        "description": "İnsanları dürt!",
+        "loading": "{EMOTE_LOADING} Dürtme gifi aranıyor...",
+        "mention_self": "{user} sanırım sıkıldın yoksa neden kendini dürtesin ki?",
+        "mention_purr": [
+          "N-nya! Beni dürtme! >~<",
+          "N-neden beni dürtüyorsun?"
+        ],
+        "message": "{user} parmak ucuyla {targets} adlı üyeyi dürttü",
+        "no_mention": "Lütfen dürtmek için en az bir üye etiketle!"
+      },
+      "pout": {
+        "description": "Somurtmanı sağlar.",
+        "loading": "Birine \"hımm\" çektiriliyor...",
+        "message": "{user} somurtuyor"
+      },
+      "senko": {
+        "description": "Seni şımartabilecek bir senko resmi gönderir.",
+        "loading": "{EMOTE_LOADING} Senko-san'ın bir resmi alınıyor...",
+        "message": "Senko-San {EMOTE_SENKO_TAIL_WAG}"
+      },
+      "ship": {
+        "description": "Kendinin bir başkasıyla veya iki kişinin birbiriyle ne kadar yakıştığını gösterir.",
+        "mention_self": "{user} kendine mi aşıksın? Kendine birini bul!",
+        "mention_purr": "N-nu! Beni kendine yakıştıramazsın {user}!",
+        "mention_snuggle": "Kız kardeşimi kendine yakıştırmana izin vermeyeceğim {user}!",
+        "no_mention": "Lütfen yakıştırmak için en az bir üye etiketle!",
+        "results": {
+          "100": "Mükemmel aşk! ❤",
+          "91_99": "Lütfen beni düğününüze davet edin. ^-^",
+          "81_90": "İkinizin evlendiğini gerçekten hayal edebiliyorum.",
+          "71_80": "\\*ikisinide birbirine iter*",
+          "61_70": "Bu ciddi bir şey gibi gözüküyor.",
+          "69": "Oh... Sanırım bu bir *çeşit* aşk, huh...? 😏",
+          "51_60": "Şimdiden öp!",
+          "41_50": "Zaten bir çiftsiniz sanırım?",
+          "31_40": "Bir çift olabilirsiniz.",
+          "21_30": "Friendzone+ (*faydaları* ile)",
+          "11_20": "Friendzone",
+          "1_10": "Arkadaş bile olamazsınız gibi görünüyor...",
+          "0": "Aşk ateşli olsaydı, bu ilişki yinede bir buz parçası olurdu."
+        },
+        "special_user": "Awww {user} tatlım. Biliyorsun ikimiz de daima 100'lük bir çiftiz.",
+        "target_bot": "Botları kendine yakıştıramazsın tuhaf şey!"
+      },
+      "shiro": {
+        "description": "Korkunç hayaletleri uzak tutabilecek ilahi habercinin bir görüntüsünü alın.",
+        "loading": "{EMOTE_LOADING} Shiro'nun bir görüntüsü alınıyor...",
+        "message": "Shiro {EMOTE_SHIRO_TAIL_WAG}"
+      },
+      "slap": {
+        "description": "Birini tokarlarsın! >:C",
+        "loading": "{EMOTE_LOADING} Üyelere tokat atılıyor...",
+        "mention_self": "Hayır, hayır, hayır, hayır! Kendini incitmene yardım etmeyeceğim {user}.",
+        "mention_purr": [
+          "Hayırrrrrr... {user} n-neden canımı yakıyorsun? T^T",
+          "\\*sana tokat atarak karşılık verir* Beni tokatlarsan sonuçlarına katlanırsın {user}!"
+        ],
+        "message": "{user} avucuyla {targets} adlı üyeyi tokatladı",
+        "no_mention": "Lütfen tokat atmak için en az bir üye etiketle!"
+      },
+      "smile": {
+        "description": "Seni güldürür. :3",
+        "loading": "{EMOTE_LOADING} Seni güldürmeye çalışıyor...",
+        "message": "{user} gülümsüyor"
+      },
+      "tail": {
+        "description": "Kuyruğunu salla...",
+        "loading": "{EMOTE_LOADING} Kuyruk sallanıyor...",
+        "message": "{user} kuyruğunu sallıyor"
+      },
+      "tickle": {
+        "description": "İnsanları güldürmek için gıdıkla.",
+        "loading": "{EMOTE_LOADING} Gıdıklama gifi aranıyor...",
+        "mention_self": "Tamam... Gerçekten gıdıklanmak istiyorsan... \\*{user} adlı üyeyi gıdıklıyor*",
+        "mention_purr": [
+          "A-adil değil! b-ben \\*gıdıklandığı için gülüyor*",
+          "\\*gülmemeye çalışıyor fakat başaramıyor*",
+          "Neden bu kadar gıdıklanıyorum? >~<"
+        ],
+        "message": "{user} nazikçe {targets} adlı üyeyi gıdıklıyor",
+        "no_mention": "Lütfen gıdıklamak için en az bir üye etiketle!"
+      }
+    },
+    "guild": {
+      "language": {
+        "description": "Mevcut Sunucuda Bot için kullanılan dili değiştirin.\nGeçerli ayarları görmek için bu komutu herhangi bir değişken olmadan kullanın.\n\nBunun için \"Sunucuyu Yönet\" iznine ihtiyacınız var.",
+        "few_args": "Yeterli argüman sağlanmadı!\nKullanım: `{prefix}language set <dil>`",
+        "invalid_args": "Geçersiz argüman!\nKullanım: `{prefix}language <set <dil>|reset>`",
+        "invalid_lang": "Sağlanan dil geçersiz!\nKullanılabilir tüm dilleri görmek için `{prefix}language` komutunu kullan.",
+        "embed": {
+          "available_lang_title": "Kullanılabilir Diller",
+          "description": "`{prefix}language set <dil>` komutunu kullanarak botun dilini, aşağıda listelenmiş desteklenen dillerden birine değiştirebilirsin.\n\n**Kullanılan Dil**: {flag} {language}",
+          "translators_title": "Çevirmenler",
+          "translators_value": "Botu tercüme eden herkese teşekkürler!\nÇeviri projesini [burada]({link}) bulabilirsin."
+        },
+        "language_set": "Dil `Türkçe (tr-tr)` olarak ayarlandı!",
+        "no_language": "Lütfen ayarlamak istediğiniz dili belirtin!"
+      },
+      "prefix": {
+        "description": "Komutlarda kullanılan öneki değiştirin.\nBotun önekinin ne olduğunu öğrenmek için botu `@etiketleyebilirsin`.\n\nBunun için \"Sunucuyu Yönet\" iznine ihtiyacın var.",
+        "few_args": "Yeterli argüman sağlanmadı!\nKullanım: `{prefix}prefix <set <yeni önek>|reset>`",
+        "invalid_args": "Geçersiz argüman!\nKullanım: `{prefix}prefix <set <yeni önek>|reset>`",
+        "no_prefix": "Bir önek belirtmelisin!",
+        "reset": "Önek sıfırlanarak tekrardan `{prefix}` olarak ayarlandı.",
+        "set": "Önek `{prefix}` olarak ayarlandı."
+      },
+      "welcome": {
+        "description": "Discord sunucunuza yeni katılan üyeleri resim ve yazıyla karşılayın!\nHerhangi bir argüman sağlamadan komutu tekrar kullanırsanız mevcut ayarlar gözükecektir.\nYardım için [Wiki makalesine]({wiki_welcome}) göz atın.\n\nBunun için \"Sunucuyu Yönet\" iznine ihtiyacın var.",
+        "custom": "Özel",
+        "embed": {
+          "channel": "Kanal",
+          "color_title": "Renk",
+          "color_value": "```\nTür:  {type}\nDeğer: {value}\n```",
+          "current_settings": "Bunlar, bu sunucunun mevcut karşılama ayarlarıdır.\nBunları değiştirmek için `{prefix}welcome [subcommand]` komutunu kullanın.\n\nAyarların nasıl değiştirileceğine ilişkin bir eğitim [wiki]({wiki_welcome}) sayfasında bulunuyor.",
+          "image_title": "Resim",
+          "image_value": "```\nArkaplan: {background}\nRenk:      {color}\nSimge:       {icon}\n```",
+          "message_title": "Mesaj",
+          "no_channel": "`Kanal Ayarlanmamış`",
+          "preview": "Önizle",
+          "subcommands_title": "Alt komutlar",
+          "subcommands_value": "```\nbg      set <arkaplan>\n        reset\nchannel set <#kanal>\n        reset\ncolor   set <hex:rrggbb|rgb:r,g,b|random>\n        reset\nicon    set <simge>\n        reset\nmsg     set <mesaj>\n        reset\ntest\n```",
+          "title": "Güncel Karşılama Ayarları"
+        },
+        "few_args": "Yeterli argüman sağlanmadı!\nKullanılabilir tüm alt komutları görmek için `{prefix}welcome` komutunu kullanın.",
+        "invalid_args": "Geçersiz argüman!\nKullanılabilir tüm alt komutları görmek için `{prefix}welcome` komutunu kullan.",
+        "invalid_bg": "Geçersiz arka plan `{background}`\nKullanılabilir arka planlar için [Wiki]({wiki_bg}) adresini kontrol edin.",
+        "invalid_bg_width": "Geçersiz özel arkaplan\nYalnızca `2000x350` çözünürlüğe sahip resimler kullanılabilir!",
+        "invalid_channel": "Lütfen geçerli bir metin kanalı etiketle!",
+        "invalid_color": "Sağlanan renk geçersiz!\nDesteklenenler şunlardır: `hex:rrggbb`, `rgb:r,g,b` veya `random`!",
+        "invalid_icon": "Geçersiz simge `{icon}`\n[Wiki]({wiki_icon}) adresine giderek kullanılabilir simgeleri görebilirsin.",
+        "invalid_icon_width": "Geçersiz özel simge.\nYalnızca `320x320` çözünürlüğe sahip simgeler kullanılabilir!",
+        "no_bg": "Lütfen bir arka plan adı belirt!\nArka plan listesi [burada]({wiki_bg}) bulunabilir.",
+        "no_booster": "Sunucu sahibinin bunu kullanmak için [Destek Sunucusunda]({guild_invite}) bir takviyeci olması gerekiyor!",
+        "no_channel": "Metin kanalı belirtilmedi! Bir metin kanalı etiketlediğinden emin ol.",
+        "no_color": "Renk belirtilmedi!\nLütfen, `hex:rrggbb`, `rgb:r,g,b` veya `random` bunlardan birini kullan.",
+        "no_icon": "Lütfen bir simge adı belirt!\nSimgelerin bir listesi [burada]({wiki_icon}) bulunabilir.",
+        "no_msg": "Mesaj belirtilmedi!",
+        "no_patreon": "Bunu kullanmak için Sunucu sahibinin Tier 2 veya Tier 3 [Patreon Üyesi]({patreon_url}) olması gerekiyor.",
+        "placeholders": {
+          "message_title": "Mevcut Mesaj",
+          "note_title": "Not",
+          "note_value": "Yer tutucu `{c_mention:<id>}` yalnızca metin, mağaza ve ses kanallarının ID'leri ile çalışır.",
+          "placeholders_title": "Kullanılabilir Yer Tutucular",
+          "result_title": "Sonuç"
+        },
+        "reset": "{type} sıfırlandı.",
+        "set": "{type}, {value} olarak ayarlandı."
+      }
+    },
+    "info": {
+      "donate": {
+        "description": "Botu ayakta tutmaya yardımcı olacak bir şey bağışla!",
+        "dm_success": "Özel mesajlarını kontrol et {user}!",
+        "dm_failure": "Sana DM gönderemedim {user}. DM'lerinin açık olduğundan emin misin?",
+        "embed": {
+          "booster_title": "Sunucu Takviyecisi",
+          "description": "Botu ayakta tutmak için para gerekiyor. Bu nedenle, - küçük veya büyük farketmeksizin - her türlü bağışa açığız. PayPal veya Ko-fi kullanarak yalnızca bir kez bağış yapmayı veya Patreon kullanarak belli aralıklarla bağışlara devam etmeyi tercih edebilirsiniz.\n\n{EMOTE_PAYPAL} [`PayPal`]({paypal_url}) (Tek Seferlik)\n{EMOTE_KOFI} [`Ko-fi`]({kofi_url}) (Tek Seferlik)\n{EMOTE_PATREON} [`Patreon`]({patreon_url}) (Yenilenen Bağış)",
+          "donate_title": "Sunucu Takviyecisi ve Bağışçı",
+          "donate_value": "Aşağıda bağış yapan veya [destek sunucusuna]({guild_invite}) takviye yapan kişilerin listesini bulabilirsiniz.\nBağış ve sunucuya takviye yapmak özel Hoşgeldin afişi veya kendi özel rollerinizi kullanma gibi özel özellikleri açar!\nBu size çekici geliyorsa, sunucuyu yükseltmeyi veya Tier 2+ Patreon üyesi olmayı düşünün.\nTek seferlik bağışlar da hoş karşılanıyor!",
+          "donators_title": "Bağış Yapanlar",
+          "more": "*ve daha fazlası...*"
+        }
+      },
+      "emote": {
+        "description": "Bir veya daha fazla emoji (özel Discord Emojileri) hakkında temel bilgiler al.\nSon 100 mesajda kullanılan tüm emoji listelemek için `--search` değişkenini kullanabilirsin.",
+        "embed": {
+          "emote_multiple": "Emoji [{current} / {total}]",
+          "emote_single": "Emoji",
+          "guild": "Sunucu",
+          "id": "ID",
+          "image": "Resim",
+          "link": "[`Link`]({link})",
+          "message": "Mesaj",
+          "name": "Adı"
+        },
+        "no_args": "Lütfen komuttan sonra `:emote:` veya `--search` değişkenini sağla.",
+        "not_found": "Son 100 mesajda herhangi bir ifade bulunamadı.",
+        "unknown_guild": "Bilinmeyen Sunucu"
+      },
+      "guild": {
+        "description": "Temel sunucu bilgilerini alın.",
+        "embed": {
+          "boost": {
+            "multiple": "{boost} takviye",
+            "single": "1 takviye",
+            "title": "Takviye",
+            "value": "{boosts} (Seviye {level}{BOOST_TIER})"
+          },
+          "channels_title": "Kanallar",
+          "channels_value": "{EMOTE_CATEGORY} Toplam: {channels_total}\n\n{EMOTE_TEXT} Metin Kanalları: {channels_text}\n{EMOTE_VOICE} Ses Kanalları: {channels_voice}",
+          "created": "Oluşturulma Tarihi",
+          "features": {
+            "animated_icon": "Hareketli Simge",
+            "banner": "Sunucu Afişi",
+            "community": "Topluluk Sunucusu",
+            "discoverable": "Discoverable",
+            "guild_preview": "Sunucu Önizlemesi",
+            "invite_screen": "Davet Arkaplanı",
+            "member_verification": "Üye Doğrulaması",
+            "news_channel": "Duyuru Kanalı",
+            "partnered": "Partner",
+            "store_channel": "Mağaza Kanalı",
+            "title": "Özellikler",
+            "vanity_url": "Özel URL",
+            "verified": "Doğrulanmış",
+            "vip_voice": "VIP Ses Bölgeleri",
+            "welcome_screen": "Hoşgeldin Ekranı"
+          },
+          "levels": {
+            "high": "(╯°□°）╯︵ ┻━┻",
+            "low": "Düşük",
+            "medium": "Orta",
+            "none": "Yok",
+            "title": "Doğrulama Seviyesi",
+            "unknown": "Bilinmeyen Seviye",
+            "very_high": "┻━┻ ミ ヽ(ಠ益ಠ)ﾉ 彡 ┻━┻"
+          },
+          "members_title": "Üyeler",
+          "members_value": "{EMOTE_MEMBERS} Toplam: {members_total}\n\n{EMOTE_SMILEY} İnsan: {members_human}\n{EMOTE_BOT} Bot: {members_bot}",
+          "owner": "Kurucu"
+        }
+      },
+      "help": {
+        "description": "Botun sahip olduğu tüm mevcut komutları gösterir.\nBelirli bir komut hakkında ek bilgi almak için, bilgi almak istediğiniz komutu bu komutun sonuna ekleyerek gönderebilirsiniz.",
+        "commands": "Kullanılabilir komutların tam listesi [`docs.purrbot.site`]({wiki}/commands/) adresinde bulunabilir!",
+        "command_menu": {
+          "categories": {
+            "fun": "Eğlence",
+            "guild": "Sunucu",
+            "info": "Bilgi",
+            "nsfw": "NSFW",
+            "owner": "Kurucu",
+            "title": "Kategoriler"
+          },
+          "description": {
+            "command_value": "Belirli bir komut hakkında daha fazla bilgi almak için `{prefix}help [komut]` komutunu kullanabilirsiniz.\nAyrıca, belirli bir kategorinin komutlarını görmek için `{prefix}help cat:[kategori]` komutunu kullanabilirsiniz.",
+            "nav_title": "Gezinme",
+            "nav_value": "Aşağıdaki eylemler için tepkilere tıklayın:\n\n◀ - Önceki Sayfa\n▶ - Sonraki Sayfa\n⏹ - Menüyü İptal Et",
+            "support": "Bot ile ilgili yardıma ihtiyacınız varsa, destek için [Destek Sunucusuna]({guild_invite}) katılmaktan çekinmeyin."
+          },
+          "nsfw_info": "Bu sayfayı görebilmek için, bu komutu bir NSFW kanalında kullan.",
+          "support_title": "Botu sevdin mi?",
+          "support_value": "Bağış yaparak botu destekleyebilirsin.\n\n{EMOTE_PAYPAL} [`PayPal`]({paypal_url}) (Tek Seferlik Bağış)\n{EMOTE_KOFI} [`Ko-fi`]({kofi_url}) (Tek Seferlik Bağış)\n{EMOTE_PATREON} [`Patreon`]({patreon_url}) (Tekrarlanan Bağış)"
+        }
+      },
+      "info": {
+        "description": "Bot hakkında temel bilgileri al.",
+        "dm_failure": "{user}, sana DM gönderemiyorum!",
+        "dm_success": "{user}, DM'lerini kontrol et!",
+        "embed": {
+          "about_title": "Hakkımda",
+          "about_value": "Oh selam!\nBen {name}. ~Nya Discord botuyum.\nAndre_601(<@{id}>) tarafından JDA ve bolca boş zamanın yardımıyla yapıldım. ;)",
+          "bot_info": {
+            "library": "Kütüphane: `JDA {jda_version}`",
+            "title": "Bot Bilgisi",
+            "version": "Bot Sürümü: `PurrBot {bot_version}`"
+          },
+          "bot_lists_title": "Bot Listeleri:",
+          "commands_title": "Komutlar",
+          "commands_value": "Tüm komutların bir listesini görmek için `{prefix}help` komutunu kullan.",
+          "links": {
+            "discord": "[`Discord (Destek)`]({guild_invite})",
+            "github": "[`GitHub`]({github_url})",
+            "policy": "[`Gizlilik Politikası ve Hizmet Koşulları`]({policy_url})",
+            "title": "Diğer Bağlantılar",
+            "twitter": "[`Twitter`]({twitter_url})",
+            "website": "[`Websitesi`]({website_url})",
+            "wiki": "[`Wiki`]({wiki})"
+          },
+          "support_title": "Botu Destekle!",
+          "support_value": "Bağış yaparak bu botu desteklemeye yardım et!\nDaha fazla bilgi için `{prefix}donate` komutunu kullan."
+        }
+      },
+      "invite": {
+        "description": "Botu davet etmek veya resmi Destek Sunucusuna katılmak için bağlantı al.",
+        "dm_failure": "Lütfen sana DM göndermeme izin ver {user}!",
+        "dm_success": "Sana bir DM gönderdim {user}!",
+        "embed": {
+          "about_title": "Bağlantılar Hakkında",
+          "about_value": "Bağlantıların her birinin farklı bir amacı vardır.\n`Botu Davet Et` beni sunucularınızdan birine davet etmeni sağlar\n`Discord` destek sunucumuza katılmanı sağlar.",
+          "info_title": "Beni davet et",
+          "info_value": "Selam! Beni Discord'una davet etmek istemen çok hoş. :3\nDiscord sunucuna beni eklemen için aşağıdaki `Botu Davet Et` seçeneğine tıklaman yeterli, böylece sunucuna biraz eğlence ve neko getirebilirim.",
+          "links": {
+            "discord": "`Discord (Destek)`",
+            "invite": "`Botu Davet Et`"
+          }
+        }
+      },
+      "ping": {
+        "description": "Botun gecikmesini gösterir.",
+        "loading": [
+          "{EMOTE_TYPING} Discord ile konuşuluyor...",
+          "{EMOTE_TYPING} Balık tutuluyor...",
+          "{EMOTE_TYPING} Ping için pong veriliyor.",
+          "{EMOTE_TYPING} [placeholder_loading_text]",
+          "{EMOTE_TYPING} Selam Discord, orada mısın?"
+        ],
+        "info": "{EMOTE_PENCIL} Mesaj Düzenleme: `{edit_message}`\n{EMOTE_CLYDE} Discord: `{discord}`",
+        "info_full": "{EMOTE_PENCIL} Mesaj Düzenleme: `{edit_message}`\n{EMOTE_CLYDE} Discord: `{discord}`\n{EMOTE_DOWNLOAD} RestAction: `{rest_action}`"
+      },
+      "quote": {
+        "button": "Mesaja Git",
+        "description": "Birinin mesajını alıntıla. İsteğe bağlı olarak mesajı aramak için bir kanal belirtebilirsin.",
+        "embed_basic": {
+          "channel": "#{channel} kanalında paylaşıldı",
+          "info": "{user} adlı üyeden alıntı"
+        },
+        "embed_image": {
+          "info": "{user} adlı üyenin {channel} kanalındaki mesajından alıntı"
+        },
+        "few_args": "Çok az argüman sağlandı!\nKullanım: `{prefix}quote <mesajID> [#kanal]`",
+        "invalid_id": "Sağlanan ID geçersiz!\nGeliştirici modunun etkinleştirildiğinden ve **mesaja** sağ tıklayıp \"ID'yi kopyala\" ya tıkladığından emin ol.",
+        "no_msg": "{channel} kanalında bu mesajı bulamadım!\nID'nin doğru olduğundan ve mesajın doğru kanalda olduğundan emin ol!",
+        "no_value": "Mesajda herhangi bir resim(ler) veya alıntı yapılabilecek herhangi bir metin yok!",
+        "nsfw_channel": "Etiketlediğiniz ({channel}) kanalı NSFW olarak işaretlenmiş fakat mesajın gönderileceği kanal NSFW olarak işaretlenmemiş!\nGüvenlik amacıyla NSFW kanallarından NSFW olmayan kanallara mesaj göndermiyorum."
+      },
+      "shards": {
+        "description": "Botun şu anda sahip olduğu tüm shard'lar hakkında temel bilgileri gösterir.",
+        "average": {
+          "title": "Ortalama",
+          "description": "Bunlar ortalama Ping ve Sunucu sayısıdır.",
+          "guilds": "Shard Başına Ortalama Sunucu",
+          "ping": "Shard Başına Ortalama Gecikme"
+        },
+        "embed": {
+          "current_title": "Senin Shardın mı?",
+          "guilds_title": "Sunucu",
+          "ping_title": "Gecikme (ms)",
+          "status_title": "Durum",
+          "title": "Shard bilgisi [{shard_id}/{shard_total}]"
+        },
+        "status": {
+          "connected": "Bağlı",
+          "disconnected": "Bağlı değil",
+          "reconnect": "Yeniden Bağlanılıyor..."
+        }
+      },
+      "stats": {
+        "description": "Sıkıcı istatistikler... 'dedi nuf.",
+        "uptime": {
+          "day": "gün",
+          "days": "gün",
+          "hour": "saat",
+          "hours": "saat",
+          "minute": "dakika",
+          "minutes": "dakika",
+          "second": "saniye",
+          "seconds": "saniye"
+        },
+        "embed": {
+          "other_title": "Diğer İstatistikler",
+          "other_value": "```yaml\nRAM: {ram}\nÇalışma Süresi: {days}, {hours}, {minutes} ve {seconds}\n```",
+          "shard_this_title": "Bu shard",
+          "shard_this_value": "```yaml\nID: {id} # ID'ler 0'dan başlar\n\nSunucular: {guilds}\n```",
+          "shard_total_title": "Toplam",
+          "shard_total_value": "```yaml\nShardlar: {shards}\n\nSunucular: {guilds}\n```",
+          "title": "İstatistikler"
+        }
+      },
+      "user": {
+        "description": "Kendiniz veya bir başkası hakkında temel bilgileri alın.",
+        "embed": {
+          "avatar": "Profil Resmi",
+          "avatar_url": "`Profil URL'i `",
+          "badges": "Rozetler",
+          "booster": "{EMOTE_BOOST_LEVEL_3} **Şu tarihten itibaren sunucuya Takviye yapıyor:**",
+          "created": "{EMOTE_SLOWMODE} **Hesap oluşturulma tarihi:**",
+          "dates": "Tarihler",
+          "id": "ID: {id}",
+          "joined": "{EMOTE_INVITE} **Sunucuya katılma tarihi:**",
+          "nickname": "Kullanıcı Adı:",
+          "no_badges": "`Rozet yok`",
+          "role_highest": "En Yüksek Rol",
+          "role_total": "Diğer Roller"
+        },
+        "more_roles": "+{remaining} daha",
+        "no_member": "Etiketlediğin üye bu sunucuda değil!",
+        "no_roles": "`Rol verilmemiş`",
+        "no_roles_others": "`Başka rol verilmemiş`"
+      }
+    },
+    "nsfw": {
+      "blowjob": {
+        "description": "Birine onu emip ememeyeceğini sormanıza izin verir.\n\nBu komut yalnızca NSFW etiketli kanallarda kullanılabilir!",
+        "mention_bot": "Bu, dilini bir boşluğa sokmak gibi olur.",
+        "mention_purr": "Sapık! Git başkasını em! \\*{user} adlı üyeye tokat atar*",
+        "mention_self": "Taaaamam. Madem kendini emmek istiyorsun, seni durdurmayacağım {user}.",
+        "message": "{user}, {target} adlı üyeye oral seks yapıyor!",
+        "no_mention": "Lütfen emmek istediğin kişiyi etiketle.",
+        "request": {
+          "denied": "{target} senden onu emmeni istemiyor {user}. :/",
+          "message": "Hey {target}!\n{user} sana oral seks yapmak istiyor. Bunu sen de ister misin?",
+          "open": "Bu kadar açgözlü olma {user}! Önceki isteğin kabul edilene, reddedilene veya zaman aşımına uğrayana kadar bekle."
+        },
+        "special_user": "Tamam tatlım. Gidip *\"oyuncaklarımı\" alayım bu sayede biraz eğlenebiliriz.\n\\*{user} adlı üyenin elini tutar ve odasına doğru koşar*"
+      },
+      "cum": {
+        "description": "Açıklamaya gerek yok.\nBu komut yalnızca NSFW etiketli kanallarda kullanılabilir!",
+        "loading": "{EMOTE_LOADING} Boşalmaya hazırlanılıyor...",
+        "message": "{user} boşalıyor."
+      },
+      "fuck": {
+        "description": "Birine onunla seks yapıp yapamayacağını sorarsın.\nBir seçeneği önceden seçmediysen, diğer kişi; hetero, anal, yuri ve yaoi arasında seçim yapabilir.\nÖn seçim yapmak için aşağıdaki argümanlardan birini kullan:\n`--hetero`\n`--anal`\n`--yaoi`\n`--yuri`\nBu komut yalnızca NSFW etiketli kanallarda kullanılabilir!",
+        "mention_bot": "Botlarla sevişemezsin!",
+        "mention_purr": "\\*{user} tokat yedi* HAYIR! Benimle değil sapık!",
+        "mention_self": "Ciddi misin, Kendini nasıl becerebilirsin ki {user}?! (Hayır. Mastürbasyonu cevap olarak kabul etmiyorum)",
+        "mention_snuggle": "HAYIR {user}! Kardeşime böyle dokunmana izin vermeyeceğim seni aptal!",
+        "message": "{user} ve {target} sevişiyor!",
+        "no_mention": "Lütfen sevişmek istediğin kişiyi etiketle.",
+        "request": {
+          "denied": "{target} seninle sevmişmek istemiyor {user}. >.<",
+          "message": "Selam {target}!\n{user} seninle sevişmek istiyor. Sen de ister misin?\nKabul etmek için \"Kabul Et\", reddetmek için \"Reddet\" butonuna tıkla.\n\n> **Bu istek 1 dakika sonra zaman aşımına uğrayacak!**",
+          "message_choose": "Selam {target}!\n{user} seninle sevişmek istiyor. Sen de ister misin?\nSeçmek için aşağıdaki butonlardan birine tıkla.\n\n> **Bu istek 1 dakika sonra zaman aşımına uğrayacak!**",
+          "open": "Bu kadar azgın biri olma {user}!\nZaten birine bu soruyu sordun! Lütfen talebin kabul edilmesini, reddedilmesini veya zaman aşımına uğramasını bekle."
+        },
+        "special_user": {
+          "accept": [
+            "Hangi yatak odasını kullanmalıyız {user}?",
+            "\\*elini {user} adlı üyenin vücudunda gezdirir* Daha gizli bir yere gidelim tatlım. 😘",
+            "Gidip *oyuncaklarımı* alayım ve birlikte biraz zaman geçirelim {user}."
+          ],
+          "deny": [
+            "Özür dilerim {user}, şu an yapamam...",
+            "Biraz daha bekleyebilir misin {user}? Şu anda müsait değilim.",
+            "\\*öpücük verir* Yapamam {user}. Üzgünüm."
+          ]
+        }
+      },
+      "neko": {
+        "message": "Müstehcen neko {EMOTE_NEKOWO}"
+      },
+      "pussylick": {
+        "description": "Birisine onun kukusunu yalayıp yalayamayacağını sorar.\n\nBu komut yalnızca NSFW etiketli kanallarda kullanılabilir!",
+        "mention_bot": "Botların kukusu yoktur.",
+        "mention_purr": "HAYIR! Bunu yapmana izin vermiyorum.",
+        "mention_self": "Bunu nasıl...? Biliyor musun? Sormayacağım.",
+        "message": "{user}, {target} adlı üyenin kukusunu yalıyor",
+        "no_mention": "Lütfen kukusunu yalamak istediğin kişiyi etiketle.",
+        "request": {
+          "denied": "{target} onun kukusunu yalamanı istemiyor {user}...",
+          "message": "Hey {target}!\n{user} senin kukunu yalamak istiyor. Bunu sen de ister misin?",
+          "open": "Susadın mı? Zaten bu soruyu birine sormuşsun {user}!\nLütfen isteğinin kabul edilmesini, reddedilmesini veya zaman aşımına uğramasını bekle."
+        },
+        "special_user": "Hehehe... {user} *\"susadın\"*, değil mi?\n\\*{user} adlı üyenin elini tutar* ve odaya doğru koşmaya başlar*"
+      },
+      "solo": {
+        "description": "Mastürbasyon yapan bir erkek veya kadın gif'i gönderir.\n\nBu komut sadece NSFW etiketli kanallarda kullanılabilir!",
+        "loading": "{EMOTE_LOADING} Ateşli bir kız gifi aranıyor...",
+        "message": "{user} kendiyle eğleniyor. 🤭"
+      },
+      "spank": {
+        "description": "Yaramaz birinin kıçına şaplak atar.\n\nBu komut yalnızca NSFW etiketli kanallarda kullanılabilir.",
+        "mention_bot": "Bir robotun kıçını mı tokatlamaya çalışıyorsun {user}? Bu sadece elini kırmana sebep olur...",
+        "mention_purr": "Gerçekten buna izin vereceğimi mi düşündün {user}?",
+        "mention_self": "Eğer gerçekten kendi kıçını şaplaklamak istiyorsan, bunu senin için yapacak başka birini bul {user}.",
+        "mention_snuggle": "HAYIR {user}! Benim kardeşime dokunmayacaksın seni Sapık!",
+        "message": "{user}, {target} adlı üyenin kıçını şaplaklıyor",
+        "no_mention": "Lütfen kıçını şaplaklamak istediğin kişiyi etiketle",
+        "request": {
+          "denied": "{target} senden onun kıçını şaplaklamanı istemiyor {user}.",
+          "message": "Selam {target}!\n{user} senin kıçını şaplaklamak istiyor. Bunu sen de ister misin?",
+          "open": "Sakinleş {user}. Bunu zaten birisinden istedin o yüzden biraz sabırlı ol..."
+        },
+        "special_user": "B-ben iyi bir kız olacağıma söz veriyorum. Lütfen beni çok ağır cezalandırma {user}. >///<"
+      },
+      "threesome": {
+        "description": "**2** kişiye seninle seks yapıp yapmak istemediklerini sorar.\nVarsayılan olarak `--ffm` (2 Kadın, 1 Erkek) kullanılır, ancak 2 Erkek, 1 Kadın veya Yalnızca Kadınlar için `--mmf` veya `--fff` argümanlarını kullanabilirsin.\n\nBu komut yalnızca NSFW etiketli kanallarda kullanılabilir!",
+        "mention_bot": "Güven bana {user}. Botlarla değil, insanlarla daha eğlenceli. ;)",
+        "mention_purr": "Biraz garip göründüğümü biliyorum, ama ben *bu* tür şeylerle ilgilenmiyorum {user}!",
+        "mention_self": "Yanılıyorsam beni düzelt, ancak üçlü seks genellikle **3** kişi gerektirmez mi {user}?",
+        "message": "{user} ile {targets} üçlü yapıyor! O//w//O",
+        "no_mention": "Lütfen sevişmek istediğin 2 kişiyi etiketle.",
+        "request": {
+          "denied": "{target1} veya {target2} sizinle seks yapmak istemiyor {user}.",
+          "message": "Selam {target1} ve {target2}!\n{user} ikinizle de sevişmek istiyor. Siz de ister misiniz?\nKabul etmek için \"Kabul Et\", reddetmek için \"Reddet\" butonuna tıkla.\nSadece ikiniz de bunu kabul ederseniz, gerçekleşecek.\n\n> **Bu istek 1 dakika sonra zaman aşımına uğrayacak!**",
+          "open": "Vay be {user}! Biraz sabır göster, sapık!\nBirilerinden zaten seninle sevişmelerini istedin. Bu yüzden; önceki isteğinin kabul etmesini, reddedilmesini veya zaman aşımına uğraşamasını bekle."
+        },
+        "special_user": "S-seninle ahlaksız şeyler yapmaktan hoşlansam da, bu benim için biraz fazla {user}... {EMOTE_BLUSH}"
+      }
+    }
+  },
+  "request": {
+    "accepted": "{target}, {user} adlı üyenin isteiğini kabul etti",
+    "buttons": {
+      "accept": "Kabul Et",
+      "deny": "Reddet",
+      "fuck_anal": "Anal",
+      "fuck_normal": "Hetero",
+      "fuck_yaoi": "Yaoi (Eşcinsel)",
+      "fuck_yuri": "Yuri (Lezbiyen)"
+    },
+    "message": "{text}\nİsteği kabul etmek için \"Kabul Et\", reddetmek için \"Reddet\" butonuna tıkla.\n\n> **Bu istek 1 dakika sonra zaman aşımına uğrayacak!**",
+    "timed_out": "İsteğin zaman aşımına uğradı {user}. {target} yeterince hızlı cevap veremedi."
+  },
+  "snuggle": {
+    "fun": {
+      "bite": {
+        "mention_snuggle": [
+          "Nya! {user} ben yemek değilim!",
+          "L-lütfen yapma {user}. B-bu çok kaba O////O",
+          "N-neden beni kemiriyorsun?"
+        ]
+      },
+      "cuddle": {
+        "mention_snuggle": [
+          "\\*{user} adlı üyeye sarılır*",
+          "\\*sıkı bir şekilde {user} adlı üyeyi kucaklar*",
+          "Bu çok rahatlatıcı. UwU"
+        ]
+      },
+      "feed": {
+        "mention_snuggle": [
+          "B-bana yemek mi verdin {user}? T-teşekkürler. \\*yemek yerken yüzü kızarır*",
+          "Yaşasın! Bedava yemek. Teşekkürler {user}.",
+          "\\*sessizce yemeği alıp kemirmeye başlar*"
+        ]
+      },
+      "fluff": {
+        "mention_snuggle": [
+          "Olmaz! {user} kuyruğumu sen kabartamazsın!",
+          "\\*kuyruğunu tutararak* Olmaz."
+        ],
+        "special_user": "N-neden kuyruğumu kabartmak istiyorsun {user}? Bunu yapabilecek bir ablaya sahibim!"
+      },
+      "hug": {
+        "mention_snuggle": [
+          "\\*{user} adlı üyeye sıkı sıkı sarılır*",
+          "Sarılmak her zaman rahatlatır {user}.",
+          "\\*{user} adlı üyeye sarılırken sessizce \"nya\" diye mırıldanır*"
+        ]
+      },
+      "kiss": {
+        "mention_purr": "Benim yardımımla kız kardeşimi öpemezsin {user}!",
+        "mention_snuggle": [
+          "nE? T-tamam. A-ama sadece yanağımı öpebilirsin {user}! \\*yanağını öpmene izir verir*",
+          "{user} b-bu... Bunu herkesin içinde yapmak biraz utanç verici. \\*utanarak bakar* T-tamam ama sadece bir öpücük. Q////Q",
+          "N-nya! Bu çok ayıp {user}..."
+        ],
+        "special_user": "N-neden kardeşimi benim aracılığımla öpmeye çalışıyorsun? O-nu kendi başına öpebilirsin {user}."
+      },
+      "lick": {
+        "mention_snuggle": [
+          "H-HEY! B-bu çok ayıp {user}.",
+          "Ben bir çeşit yemek değilim {user}.",
+          "Hayır. Bu çok ayıp {user}! >////<"
+        ]
+      },
+      "neko": {
+        "purr": "{EMOTE_SNUGGLE} Nya. Bu, ablamın eski bir fotoğrafı. >w<",
+        "snuggle": "{EMOTE_SNUGGLE} B-bu ben miyim? OwO"
+      },
+      "pat": {
+        "mention_snuggle": [
+          "\\*okşanmanın keyfini çıkarır*",
+          "Yaşasın! Bir okşama. Teşekkürler {user}.",
+          "\\*okşanırken sırıtır*"
+        ]
+      },
+      "poke": {
+        "mention_snuggle": [
+          "Hayııııır. Beni dürtme!",
+          "EEP! \\*korkmuş görünüyor* N-neden beni dürtüyorsun?",
+          "Neden beni dürtüyorsun? Yanlış bir şey mi yaptım? Q////Q"
+        ]
+      },
+      "ship": {
+        "mention_purr": "Hayır! Kardeşimi kendine yakıştıramazsın {user}!",
+        "mention_snuggle": "H-hayır. {user} adlı üyeyle yakıştırılmak istemiyorum.",
+        "special_user": "N-neden ikinizi birbirinize yakıştırmaya çalışayım ki {user}?\nG-gidin ve bunu kendiniz yapın. >////<"
+      },
+      "slap": {
+        "mention_snuggle": [
+          "\\*{user} adlı üyeden kaçıyor*",
+          "\\*koşarak bir battaniyenin altına saklanır* {user} adlı üye çok zalim birisi!",
+          "Nuuuuu. \\*ağlamaya başlar*"
+        ]
+      },
+      "tickle": {
+        "mention_snuggle": [
+          "Y-yardım et! G-gülemi- \\*gülmeye başlar*",
+          "B-bu hiç adil değil. B-ben seni gıdıklayamıyorum... \\*gülmeye başlar*",
+          "\\*normal davranmaya çalışır fakat başaramaz*"
+        ]
+      }
+    },
+    "info": {
+      "info": {
+        "dm_failure": "DM'lerin kapalı {user}. Eğer DM'in kapalıysa sana bilgi gönderemem.",
+        "dm_success": "📬{user}, yeni bir postan var!",
+        "embed": {
+          "about_title": "Hakkımda",
+          "about_value": "Oh Selam!\nBen {name}. \\*Purr*'ün kızkardeşiyim"
+        }
+      },
+      "invite": {
+        "message": "Nya! Babam Andre 601'i [Patreon]({patreon_url}) üzerinde desteklemediğiniz sürece (15$) beni Discord'unuza davet edemezsiniz\n\nAma yinede ablamı davet edebilirsiniz!"
+      }
+    },
+    "nsfw": {
+      "blowjob": {
+        "mention_snuggle": "\\*kaçar ve saklanır* Sapık şeyler istemiyorum {user}.",
+        "mention_self": "Hehehe... Kendini yalıyorsun. Yalnız veya utangaç olmalısın {user}.",
+        "special_user": "N-neden bunu benimle yapmak istiyorsun {user}? B-bunun için bir kardeşim var."
+      },
+      "fuck": {
+        "mention_purr": "Hayır {user}! Kardeşimle böyle şeyler yapmana izin vermeyeceğim!",
+        "mention_snuggle": "H-hayır! Bunu seninle yapmak istemiyorum {user}."
+      },
+      "pussylick": {
+        "mention_snuggle": "H-hey. Beni *burada* yalamanı istemiyorum {user}!"
+      },
+      "spank": {
+        "mention_purr": "HAYIR! Kardeşime elini bile sürmeyeceksin {user}!",
+        "mention_snuggle": "\\*Uzağa koşar* H-hayır! Böyle şeyler istemiyorum {user}!",
+        "special_user": "A-ama {user}! B-bunu kardeşimle yapmalısın! O benden daha yaramaz."
+      },
+      "threesome": {
+        "mention_snuggle": "B-ben böyle şeylere ilgi duymuyorum {user}!"
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -23,38 +23,39 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.rainestormee.jdacommand.CommandAttribute;
 import com.github.rainestormee.jdacommand.CommandDescription;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.api.requests.RestAction;
-import net.dv8tion.jda.api.utils.MarkdownSanitizer;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
-import site.purrbot.bot.constants.Emotes;
 import site.purrbot.bot.util.HttpUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static net.dv8tion.jda.api.exceptions.ErrorResponseException.ignore;
-import static net.dv8tion.jda.api.requests.ErrorResponse.UNKNOWN_MESSAGE;
 
 @CommandDescription(
         name = "Threesome",
         description = "purr.nsfw.threesome.description",
         triggers = {"threesome", "3some"},
         attributes = {
-                @CommandAttribute(key = "category", value = "nsfw"),
-                @CommandAttribute(key = "usage", value = 
-                        "{p}threesome <@user1> <@user2>\n" +
-                        "{p}threesome <@user1> <@user2> --fff\n" +
-                        "{p}threesome <@user1> <@user2> --mmf"
-                ),
-                @CommandAttribute(key = "help", value = "{p}threesome <@user1> <@user2> [--fff|--mmf]")
+            @CommandAttribute(key = "category", value = "nsfw"),
+            @CommandAttribute(key = "usage", value =
+                "{p}threesome <@user1> <@user2>\n" +
+                "{p}threesome <@user1> <@user2> --fff\n" +
+                "{p}threesome <@user1> <@user2> --mmf"
+            ),
+            @CommandAttribute(key = "help", value = "{p}threesome <@user1> <@user2> [--fff|--mmf]")
         }
 )
 public class CmdThreesome implements Command{
     
+    private final Logger logger = LoggerFactory.getLogger(CmdThreesome.class);
     private final PurrBot bot;
     
     public CmdThreesome(PurrBot bot){
@@ -66,14 +67,14 @@ public class CmdThreesome implements Command{
             .build();
     
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
-        if(msg.getMentionedMembers().isEmpty() || msg.getMentionedMembers().size() < 2){
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
+        if(members.isEmpty() || members.size() < 2){
             bot.getEmbedUtil().sendError(tc, member, "purr.nsfw.threesome.no_mention");
             return;
         }
         
-        Member target1 = msg.getMentionedMembers().get(0);
-        Member target2 = msg.getMentionedMembers().get(1);
+        Member target1 = members.get(0);
+        Member target2 = members.get(1);
         
         if(target1.equals(guild.getSelfMember()) || target2.equals(guild.getSelfMember())){
             if(bot.isBeta()){
@@ -120,22 +121,20 @@ public class CmdThreesome implements Command{
                 bot.getMsg(guild.getId(), "purr.nsfw.threesome.request.message", member.getEffectiveName())
                         .replace("{target1}", target1.getAsMention())
                         .replace("{target2}", target2.getAsMention())
+        ).setActionRow(
+                bot.getRequestUtil().getButton(guild.getId(), "threesome", true),
+                bot.getRequestUtil().getButton(guild.getId(), "threesome", false)
         ).queue(
-                message -> RestAction.allOf(
-                        message.addReaction(Emotes.ACCEPT.getNameAndId()), 
-                        message.addReaction(Emotes.CANCEL.getNameAndId())
-                ).queue(
-                        v -> handleEvent(message, member, target1, target2, args),
-                        e -> bot.getEmbedUtil().sendError(tc, member, "errors.request_error")
-                )
+                message -> handleEvent(message, member, target1, target2, args),
+                e -> bot.getEmbedUtil().sendError(tc, member, "errors.request_error")
         );
     }
     
-    private boolean allUser(List<String> list, String id, String emoji){
-        if(emoji.equals(Emotes.CANCEL.getId()))
+    private boolean allUser(List<String> list, String id, String buttonId){
+        if(buttonId.equals("purr:threesome:deny"))
             return true;
         
-        if(!emoji.equals(Emotes.ACCEPT.getId()))
+        if(!buttonId.equals("purr:threesome:accept"))
             return false;
         
         list.remove(id);
@@ -156,16 +155,12 @@ public class CmdThreesome implements Command{
         
         EventWaiter waiter = bot.getWaiter();
         waiter.waitForEvent(
-                GuildMessageReactionAddEvent.class,
+            ButtonInteractionEvent.class,
                 event -> {
-                    MessageReaction.ReactionEmote emote = event.getReactionEmote();
-                    if(!emote.isEmote())
-                        return false;
-                    
-                    if(!emote.getId().equals(Emotes.ACCEPT.getId()) && !emote.getId().equals(Emotes.CANCEL.getId()))
-                        return false;
-                    
                     if(event.getUser().isBot())
+                        return false;
+                    
+                    if(event.getMember() == null)
                         return false;
                     
                     if(!event.getMember().equals(target1) && !event.getMember().equals(target2))
@@ -174,33 +169,31 @@ public class CmdThreesome implements Command{
                     if(!event.getMessageId().equals(botMsg.getId()))
                         return false;
                     
-                    return allUser(list, event.getUserId(), emote.getId());
+                    if(!event.isAcknowledged())
+                        event.deferEdit().queue();
+                    
+                    return allUser(list, event.getUser().getId(), event.getComponentId());
                 },
                 event -> {
-                    TextChannel channel = event.getChannel();
+                    TextChannel channel = event.getGuildChannel().asTextChannel();
                     queue.invalidate(bot.getRequestUtil().getQueueString("threesome", guild.getId(), author.getId()));
                     
-                    if(event.getReactionEmote().getId().equals(Emotes.CANCEL.getId())){
+                    if(event.getComponentId().equals("purr:threesome:deny")){
                         list.remove(target1.getId());
                         list.remove(target2.getId());
-    
-                        botMsg.delete().queue(null, ignore(UNKNOWN_MESSAGE));
-                        channel.sendMessage(MarkdownSanitizer.escape(
-                                bot.getMsg(
-                                        guild.getId(),
-                                        "purr.nsfw.threesome.request.denied",
-                                        author.getAsMention()
-                                )
-                                .replace("{target1}", target1.getEffectiveName())
-                                .replace("{target2}", target2.getEffectiveName())
-                        )).queue();
-                    }else{
-                        String targets = String.join(
-                                " ",
-                                target1.getEffectiveName(),
-                                bot.getMsg(guild.getId(), "misc.and"),
-                                target2.getEffectiveName()
+                        
+                        botMsg.delete().queue(
+                                null,
+                                e -> logger.warn("Unable to delete own Message for threesome! Was it already deleted?")
                         );
+                        
+                        channel.sendMessage(
+                                bot.getMsg(guild.getId(), "purr.nsfw.threesome.request.denied", author.getAsMention())
+                                        .replace("{target1}", target1.getEffectiveName())
+                                        .replace("{target2}", target2.getEffectiveName())
+                        ).queue();
+                    }else{
+                        List<String> targets = Arrays.asList(target1.getEffectiveName(), target2.getEffectiveName());
     
                         HttpUtil.ImageAPI api;
                         if(bot.getMessageUtil().hasArg("mmf", args)){
@@ -216,28 +209,21 @@ public class CmdThreesome implements Command{
                     }
                 }, 1, TimeUnit.MINUTES,
                 () -> {
-                    TextChannel channel = botMsg.getTextChannel();
-                    botMsg.delete().queue(null, ignore(UNKNOWN_MESSAGE));
+                    TextChannel channel = botMsg.getChannel().asTextChannel();
+                    botMsg.delete().queue(
+                            null,
+                            e -> logger.warn("Unable to delete own Message for Threesome! Was it already deleted?")
+                    );
                     queue.invalidate(bot.getRequestUtil().getQueueString("threesome", guild.getId(), author.getId()));
-                    
+    
                     list.remove(target1.getId());
                     list.remove(target2.getId());
-    
-                    String targets = String.join(
-                            " ",
-                            target1.getEffectiveName(),
-                            bot.getMsg(guild.getId(), "misc.and"),
-                            target2.getEffectiveName()
-                    );
                     
-                    channel.sendMessage(MarkdownSanitizer.escape(
-                            bot.getMsg(
-                                    guild.getId(),
-                                    "request.timed_out",
-                                    author.getAsMention(),
-                                    targets
-                            )
-                    )).queue();
+                    List<String> targets = Arrays.asList(target1.getEffectiveName(), target2.getEffectiveName());
+                    
+                    channel.sendMessage(
+                            bot.getMsg(guild.getId(), "request.timed_out", author.getAsMention(), targets)
+                    ).queue();
                 }
         );
     }

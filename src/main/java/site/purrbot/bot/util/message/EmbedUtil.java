@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -18,22 +18,21 @@
 
 package site.purrbot.bot.util.message;
 
-import ch.qos.logback.classic.Logger;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
-import org.slf4j.LoggerFactory;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import site.purrbot.bot.PurrBot;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EmbedUtil {
     
     private final PurrBot bot;
-    private final Logger logger = (Logger)LoggerFactory.getLogger(EmbedUtil.class);
     
     public EmbedUtil(PurrBot bot){
         this.bot = bot;
@@ -45,7 +44,7 @@ public class EmbedUtil {
 
     public EmbedBuilder getEmbed(Member member){
         return getEmbed().setFooter(
-                bot.getMsg(member.getGuild().getId(), "embed.footer", member.getUser().getAsTag()), 
+                bot.getMsg(member.getGuild().getId(), "embed.footer", member.getUser().getAsTag(), false), 
                 member.getUser().getEffectiveAvatarUrl()
         );
     }
@@ -109,7 +108,7 @@ public class EmbedUtil {
                     false
             );
 
-        tc.sendMessage(embed.build()).queue();
+        tc.sendMessageEmbeds(embed.build()).queue();
     }
     
     
@@ -140,6 +139,6 @@ public class EmbedUtil {
             return;
         }
         
-        tc.sendMessage(getPermErrorEmbed(member, tc.getGuild(), channel, permission, self)).queue();
+        tc.sendMessageEmbeds(getPermErrorEmbed(member, tc.getGuild(), channel, permission, self)).queue();
     }
 }

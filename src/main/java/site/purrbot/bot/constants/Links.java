@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -27,12 +27,9 @@ public class Links {
     public static final String GITHUB = "https://purrbot.site/github";
 
     // Bot lists
-    public static final String BOTLIST_SPACE          = "https://botlist.space/bot/425382319449309197";
-    public static final String DISCORD_BOATS          = "https://discord.boats/bot/purr";
-    public static final String DISCORDBOTLIST_COM     = "https://discordbotlist.com/bots/purr";
     public static final String DISCORD_BOTS_GG        = "https://discord.bots.gg/bots/425382319449309197";
     public static final String DISCORDEXTREMELIST_XYZ = "https://discordextremelist.xyz/bots/purr";
-    public static final String DISCORDSERVICES_NET    = "https://discordservices.net/bot/425382319449309197";
+    public static final String DISCORDSERVICES_NET    = "https://dbot.page/purr";
 
     // Other links
     public static final String KOFI        = "https://ko-fi.com/andre_601";

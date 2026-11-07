@@ -1,5 +1,5 @@
 /*
- *  Copyright 2018 - 2021 Andre601
+ *  Copyright 2018 - 2022 Andre601
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  *  documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -23,7 +23,7 @@ import com.github.rainestormee.jdacommand.CommandDescription;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import site.purrbot.bot.PurrBot;
 import site.purrbot.bot.commands.Command;
 import site.purrbot.bot.constants.IDs;
@@ -37,9 +37,9 @@ import java.util.stream.Collectors;
         description = "purr.fun.kiss.description",
         triggers = {"kiss", "love", "kissu"},
         attributes = {
-                @CommandAttribute(key = "category", value = "fun"),
-                @CommandAttribute(key = "usage", value = "{p}kiss <@user> [@user ...]"),
-                @CommandAttribute(key = "help", value = "{p}kiss <@user> [@user ...]")
+            @CommandAttribute(key = "category", value = "fun"),
+            @CommandAttribute(key = "usage", value = "{p}kiss <@user> [@user ...]"),
+            @CommandAttribute(key = "help", value = "{p}kiss <@user> [@user ...]")
         }
 )
 public class CmdKiss implements Command{
@@ -51,34 +51,45 @@ public class CmdKiss implements Command{
     }
 
     @Override
-    public void run(Guild guild, TextChannel tc, Message msg, Member member, String... args){
-        List<Member> members = msg.getMentionedMembers();
+    public void run(Guild guild, TextChannel tc, Message msg, Member member, List<Member> members, String... args){
         if(members.isEmpty()){
             bot.getEmbedUtil().sendError(tc, member, "purr.fun.kiss.no_mention");
             return;
         }
         
-        if(members.contains(guild.getSelfMember())){
-            if(bot.isBeta()){
+        if(bot.isBeta()){
+            if(containsAny(members, IDs.PURR)){
                 if(bot.isSpecial(member.getId())){
                     tc.sendMessage(
-                            bot.getMsg(guild.getId(), "snuggle.fun.kiss.special_user", member.getAsMention())
+                        bot.getMsg(guild.getId(), "snuggle.fun.kiss.special_user", member.getAsMention())
                     ).queue();
                 }else{
                     tc.sendMessage(
-                            bot.getRandomMsg(guild.getId(), "snuggle.fun.kiss.mention_snuggle", member.getAsMention())
+                        bot.getMsg(guild.getId(), "snuggle.fun.kiss.mention_purr", member.getAsMention())
                     ).queue();
                 }
-            }else{
+            }else
+            if(containsAny(members, IDs.SNUGGLE)){
+                tc.sendMessage(
+                    bot.getRandomMsg(guild.getId(), "snuggle.fun.kiss.mention_snuggle", member.getAsMention())
+                ).queue();
+            }
+        }else{
+            if(containsAny(members, IDs.PURR)){
                 if(bot.isSpecial(member.getId())){
                     tc.sendMessage(
-                            bot.getMsg(guild.getId(), "purr.fun.kiss.special_user", member.getAsMention())
+                        bot.getMsg(guild.getId(), "purr.fun.kiss.special_user", member.getAsMention())
                     ).queue();
                 }else{
                     tc.sendMessage(
-                            bot.getRandomMsg(guild.getId(), "purr.fun.kiss.mention_purr", member.getAsMention())
+                        bot.getRandomMsg(guild.getId(), "purr.fun.kiss.mention_purr", member.getAsMention())
                     ).queue();
                 }
+            }else
+            if(containsAny(members, IDs.SNUGGLE)){
+                tc.sendMessage(
+                    bot.getMsg(guild.getId(), "purr.fun.kiss.mention_snuggle", member.getAsMention())
+                ).queue();
             }
         }
         
@@ -88,12 +99,12 @@ public class CmdKiss implements Command{
             ).queue();
         }
         
-        String targets = members.stream()
+        List<String> targets = members.stream()
                 .filter(mem -> !mem.getId().equals(IDs.PURR))
                 .filter(mem -> !mem.getId().equals(IDs.SNUGGLE))
                 .filter(mem -> !mem.equals(member))
                 .map(Member::getEffectiveName)
-                .collect(Collectors.joining(", "));
+                .collect(Collectors.toList());
         
         if(targets.isEmpty())
             return;
@@ -101,5 +112,14 @@ public class CmdKiss implements Command{
         tc.sendMessage(bot.getMsg(guild.getId(), "purr.fun.kiss.loading")).queue(message ->
                 bot.getRequestUtil().handleEdit(tc, message, HttpUtil.ImageAPI.KISS, member, targets)
         );
+    }
+    
+    private boolean containsAny(List<Member> members, String id){
+        for(Member member : members){
+            if(member.getId().equals(id))
+                return true;
+        }
+        
+        return false;
     }
 }
